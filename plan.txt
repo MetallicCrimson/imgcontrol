@@ -1,0 +1,90 @@
+This is all the shit needed for ImgControl.
+I originally wrote these things by hand, but I think this will be more convenient
+
+
+### FILES ###
+
+- main.py
+just acts as a hub, no real logic in here (or very litte)
+new plan: what if main.py keeps track of the states and the timer? whenever the state changes (either cause of the timer or the user), it calls logic.py, and acts accordingly
+...but that would mean main.py has to hold the mouse and keyboard events as well, right?
+(or could logic.py still do it?)
+
+
+- logic.py
+the actual working of the program
+
+
+- graphics.py
+rendering stuff: quickmenu, background, menu if needed
+
+
+- config.txt
+the things the users can set (either directly from the menu, or from the UI): window size, menu position, timing (including sessions and breaks), ordering type
+
+
+- data.txt
+the path of the pictures (for saving disk space, the program doesn't store the images themselves, only the paths)
+
+
+### STATES ###
+- session
+
+- break
+
+- paused (one or two?)
+
+- menu (probably gets deleted)
+
+
+### STILL QUESTIONS ###
+is there a separate session-paused and break-paused state, or is the solution different?
+
+is there a menu state? (probably not, it just connects to the break state...?)
+
+preloading? probably not worth it
+
+databases? probably not worth it
+
+does data.txt store filenames or folder names?
+[filenames, but do I even need it? it can be a variable as well]
+
+does data.txt store full or relative paths?
+[full]
+
+ordering type: alphabetical and random? or is there something else?
+
+
+### idk, try to plan it all
+Starting up: main.py
+Immediately calls logic.py? Perhaps?
+...or is the state machine located in main.py? (that's an important idea, whether it goes through or not)
+
+New idea:
+Two states? One says if it's session or break, and the other says if the timer is running
+So the choices: one state machine with 4 states, or two with 2 each?
+
+If it is:
+main.py says the program is in pause state(?)
+
+Is menu size needed?
+
+
+
+
+### Timer ###
+Let's talk about the timer.
+(It only has to be precise to one second)
+Do I want to do it myself, or should I use a library?
+I think the former is better, but we'll see
+
+
+## Slightly new plan ##
+I'll do it with just one directory! The user can change it anytime.
+Later, I can extend it, if I want to
+That brings another question: how do I even represent stuff?
+
+I have an idea, which could be crucial for the extended version, but it sounds very suboptimal - and it definitely would be an overkill for just one directory. But it would be fun to build!
+The idea is a complete directory structure from scratch. It would use arrays/dictionaries for the folders, and each entry would be either a file or another folder (so another array/dictionary).
+Maybe a dictionary would be better? The key is the name of the entry, and the value represents what it is.
+Well, that sounds very interesting
