@@ -15,6 +15,7 @@ from PIL import Image
 import math
 
 # ⭝ ⭜ 
+# This is just a check
 
 # some constants
 menu_width = 200
