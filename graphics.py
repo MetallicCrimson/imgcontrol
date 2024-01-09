@@ -28,18 +28,16 @@ circlePen.setWidth(0)
 menuBrush = QColor(0,0,0)
 
 class QuickMenu(QGraphicsItemGroup):
-    def __init__(self,x,y,win_width,win_height,frame): # possibly more...?
+    def __init__(self,window_width, window_height, x, y, session_length, break_length, history_size, random_state, directory, frame): # possibly more...?
         super().__init__()
         #self.setPos(x,y)
 
         # what
         self.frame = frame
         self.currentState = "session"
-        self.randomState = True
+        self.randomState = random_state
 
-        self.bigImgFlag = False
-
-        # is there a way to check if the menu has been moved?
+        # is there another way to check if the menu has been moved?
         # most likely yes. oh whatever
         self.freshlyPressed = False
 
@@ -50,13 +48,13 @@ class QuickMenu(QGraphicsItemGroup):
         tempRect2.setBrush(menuBrush)
         tempRect3 = QGraphicsRectItem(x+230,y+20,7,7) # right square
         tempRect3.setBrush(menuBrush)
-        tempCircle1 = QGraphicsEllipseItem(0,10,37,37)
+        tempCircle1 = QGraphicsEllipseItem(x,y+10,37,37)
         tempCircle1.setBrush(menuBrush)
-        tempCircle2 = QGraphicsEllipseItem(0,10,20,20)
+        tempCircle2 = QGraphicsEllipseItem(x,y+10,20,20)
         tempCircle2.setBrush(menuBrush)
-        tempCircle3 = QGraphicsEllipseItem(212,10,37,37)
+        tempCircle3 = QGraphicsEllipseItem(x+212,y+10,37,37)
         tempCircle3.setBrush(menuBrush)
-        tempCircle4 = QGraphicsEllipseItem(207,10,20,20)
+        tempCircle4 = QGraphicsEllipseItem(x+207,y+10,20,20)
         tempCircle4.setBrush(menuBrush)
         #self.addToGroup(tempRect1)
         self.addToGroup(tempRect2)
@@ -67,25 +65,28 @@ class QuickMenu(QGraphicsItemGroup):
         #self.addToGroup(tempCircle4)
 
         # !!!
-        self.images = buildDirStructure("C:/Users/tamer/Documents/programming/python/ImgControl_py/avifFolder")
-        self.imgId = random.randint(0,len(self.images)-1)
+        self.images = False
+        if directory != None:
+            self.images = buildDirStructure(directory)
+            self.imgId = random.randint(0,len(self.images)-1) # !!! fix
+
         imgName = self.images[self.imgId]
         self.frame.imgName = imgName
         self.frame.changeBackground(imgName)
 
-        self.historySize = 50
+        self.historySize = history_size
         self.resetHistory()
         self.imgHistory[0] = self.frame.imgName
 
         # Elements of UI: four buttons and the timer circle
         # positions: hardcode? menu size is going to be fixed anyways
-        buttonRandom = TestButton(7,15,27,27, "random", self.randomState)
-        buttonRestart = TestButton(39,15,27,27, "restart", None)
-        buttonLeft = TestButton(71,15,16,27,"left", None)
-        buttonRight = TestButton(160,15,16,27, "right", None)
-        buttonDirectory = TestButton(181,15,27,27, "directory", None)
-        buttonSettings = TestButton(213,15,27,27, "settings", None)
-        timerCircle = TimerCircle(x+88, y-6,72)
+        buttonRandom = TestButton(x+7,y+15,27,27, "random", self.randomState)
+        buttonRestart = TestButton(x+39,y+15,27,27, "restart", None)
+        buttonLeft = TestButton(x+71,y+15,16,27,"left", None)
+        buttonRight = TestButton(x+160,y+15,16,27, "right", None)
+        buttonDirectory = TestButton(x+181,y+15,27,27, "directory", None)
+        buttonSettings = TestButton(x+213,y+15,27,27, "settings", None)
+        timerCircle = TimerCircle(x+88, y-6,72, session_length, break_length)
 
         self.buttonRandom = buttonRandom
         self.buttonRestart = buttonRestart
@@ -104,18 +105,12 @@ class QuickMenu(QGraphicsItemGroup):
         self.addToGroup(timerCircle)
 
         self.setAcceptHoverEvents(True)
-        self.win_width = win_width
-        self.win_height = win_height
+        self.win_width = window_width
+        self.win_height = window_height
 
 
         # here? is it a good solution?
         self.settingsWindow = SettingsWindow(self)
-
-        debugState = QGraphicsSimpleTextItem(self.currentState)
-        debugState.setBrush(QColorConstants.White)
-        self.addToGroup(debugState)
-        self.debugState = debugState
-        debugState.setPos(20,100)
 
 
     def hoverEnterEvent(self, event: QGraphicsSceneHoverEvent) -> None:
@@ -206,6 +201,7 @@ class ImgFrame(QGraphicsView):
         self.backgroundPixmap = None
 
         self.setScene(self.myScene)
+        self.move(x,y)
 
         x = 0
         y = 0
@@ -327,8 +323,8 @@ def renderImgFrame(x,y,width,height):
     return tempImgFrame
 
 
-def renderQuickMenu(x,y,win_width,win_height,frame):
-    tempMenu = QuickMenu(x,y,win_width,win_height,frame)
+def renderQuickMenu(window_width, window_height, menu_position_x, menu_position_y, session_length, break_length, history_size, random_state, directory, frame):
+    tempMenu = QuickMenu(window_width, window_height, menu_position_x, menu_position_y, session_length, break_length, history_size, random_state, directory, frame)
 
     return tempMenu
 
@@ -454,7 +450,7 @@ class TestButton(QGraphicsItemGroup):
             
     
 class TimerCircle(QGraphicsItemGroup):
-    def __init__(self,x,y,r):
+    def __init__(self,x,y,r, session_length, break_length):
         super().__init__()
         outlineCircle = QGraphicsEllipseItem(x,y,r,r)
         outlineCircle.setPen(outlinePen)
@@ -465,7 +461,7 @@ class TimerCircle(QGraphicsItemGroup):
         redCircle.setBrush(QColorConstants.Red)
         redCircle.setPen(circlePen)
 
-        tempText1 = QGraphicsSimpleTextItem("2:34")
+        tempText1 = QGraphicsSimpleTextItem("2:34") # !!! fix
         tempText1.setFont(QFont("TypeWriter", 15, 0, False))
         tempText1.setY(greenCircle.boundingRect().center().y() - tempText1.boundingRect().height()/2)
         tempText1.setX(greenCircle.boundingRect().center().x() - tempText1.boundingRect().width()/2)
@@ -482,20 +478,21 @@ class TimerCircle(QGraphicsItemGroup):
         self.radius = outlineCircle.boundingRect().width()/2
 
 
-        self.sessionTime = 3000
-        self.breakTime = 1000
+        self.sessionTime = session_length * 1000
+        self.breakTime = break_length * 1000
         self.currentTime = self.sessionTime
         self.interval = 50
 
         self.timer = QTimer()
         self.timer.setInterval(50)
         self.timer.timeout.connect(self.update_time)
-        self.timer.start()
+
+        if self.parentItem().images:
+            self.timer.start()
 
     def restart_time(self):
         self.currentTime = self.sessionTime
         self.parentItem().currentState = "session"
-        self.parentItem().debugState.setText("session")
         self.timer.start()
         self.repaint()
 
@@ -510,7 +507,6 @@ class TimerCircle(QGraphicsItemGroup):
                     if self.breakTime > 0:
                         self.currentTime = self.breakTime
                         self.parentItem().currentState = "break"
-                        self.parentItem().debugState.setText("break")
                     else:
                         self.currentTime = self.sessionTime
                         imgName = self.getNextImg()
@@ -535,7 +531,6 @@ class TimerCircle(QGraphicsItemGroup):
                 case "break":
                     self.currentTime = self.sessionTime
                     self.parentItem().currentState = "session"
-                    self.parentItem().debugState.setText("session")
 
                     #self.parentItem().imgId = random.randint(0,len(self.parentItem().images)-1)
                     if self.parentItem().historyIndex == 0:

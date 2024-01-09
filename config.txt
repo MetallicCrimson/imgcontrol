@@ -1,2 +1,0 @@
-# Here comes all the stored config data, for example width, height, menu
-# position, etc.
