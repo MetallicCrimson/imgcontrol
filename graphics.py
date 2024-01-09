@@ -314,6 +314,9 @@ class ImgFrame(QGraphicsView):
     def closeEvent(self, a0: QCloseEvent | None) -> None:
         if self.quickMenu.settingsWindow.isVisible:
             self.quickMenu.settingsWindow.close()
+        
+        if os.path.exists(os.getcwd() + "/temp.jpg"):
+            os.remove(os.getcwd() + "/temp.jpg")
 
         return super().closeEvent(a0)
 
