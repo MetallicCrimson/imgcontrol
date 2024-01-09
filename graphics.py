@@ -66,17 +66,16 @@ class QuickMenu(QGraphicsItemGroup):
 
         # !!!
         self.images = False
-        if directory != None:
+        self.historySize = history_size
+        
+        if directory != "None":
             self.images = buildDirStructure(directory)
             self.imgId = random.randint(0,len(self.images)-1) # !!! fix
-
-        imgName = self.images[self.imgId]
-        self.frame.imgName = imgName
-        self.frame.changeBackground(imgName)
-
-        self.historySize = history_size
-        self.resetHistory()
-        self.imgHistory[0] = self.frame.imgName
+            imgName = self.images[self.imgId]
+            self.frame.imgName = imgName
+            self.frame.changeBackground(imgName)
+            self.resetHistory()
+            self.imgHistory[0] = self.frame.imgName
 
         # Elements of UI: four buttons and the timer circle
         # positions: hardcode? menu size is going to be fixed anyways
@@ -86,7 +85,7 @@ class QuickMenu(QGraphicsItemGroup):
         buttonRight = TestButton(x+160,y+15,16,27, "right", None)
         buttonDirectory = TestButton(x+181,y+15,27,27, "directory", None)
         buttonSettings = TestButton(x+213,y+15,27,27, "settings", None)
-        timerCircle = TimerCircle(x+88, y-6,72, session_length, break_length)
+        timerCircle = TimerCircle(x+88, y-6,72, session_length, break_length, self)
 
         self.buttonRandom = buttonRandom
         self.buttonRestart = buttonRestart
@@ -314,6 +313,11 @@ class ImgFrame(QGraphicsView):
         if os.path.exists(os.getcwd() + "/temp.jpg"):
             os.remove(os.getcwd() + "/temp.jpg")
 
+        # write config.txt
+        tempConfig = ""
+        tempConfig += str(self.width()) + "\n" + str(self.height()) + "\n" + str(self.pos().x()) + "\n" + str(self.pos().y()) + "\n" + str(int(self.quickMenu.pos().x())) + "\n" + str(int(self.quickMenu.pos().y())) + "\n" + str(int(self.quickMenu.timerCircle.sessionTime/1000)) + "\n" + str(int(self.quickMenu.timerCircle.breakTime/1000)) + "\n"
+        print(tempConfig)
+
         return super().closeEvent(a0)
 
 
@@ -450,8 +454,9 @@ class TestButton(QGraphicsItemGroup):
             
     
 class TimerCircle(QGraphicsItemGroup):
-    def __init__(self,x,y,r, session_length, break_length):
+    def __init__(self,x,y,r, session_length, break_length, qm):
         super().__init__()
+        self.setParentItem(qm)
         outlineCircle = QGraphicsEllipseItem(x,y,r,r)
         outlineCircle.setPen(outlinePen)
         greenCircle = QGraphicsEllipseItem(x,y,r,r)

@@ -18,7 +18,7 @@ if (__name__ == '__main__'):
 30
 20
 True
-None"""
+""" + os.getcwd() + "/testFolder"
 
         f = open("config.txt", "w")
         f.write(tempConfig)
@@ -57,6 +57,7 @@ None"""
     #frame.scene().addItem(bg_img)☻
     frame.scene().addItem(quick_menu)
     frame.quickMenu = quick_menu
+    #frame.quickMenu = quick_menu
     frame.setWindowTitle("ImgControl")
     #frame.move(50,50) # this is interesting. lucky guess 4ever
     #print(frame.scene().items()[0])
