@@ -15,7 +15,6 @@ from PIL import Image
 import math
 
 # ⭝ ⭜ 
-# This is just a check
 
 # some constants
 menu_width = 200
@@ -37,6 +36,8 @@ class QuickMenu(QGraphicsItemGroup):
         self.frame = frame
         self.currentState = "session"
         self.randomState = True
+
+        self.bigImgFlag = False
 
         # is there a way to check if the menu has been moved?
         # most likely yes. oh whatever
@@ -66,7 +67,7 @@ class QuickMenu(QGraphicsItemGroup):
         #self.addToGroup(tempCircle4)
 
         # !!!
-        self.images = buildDirStructure("C:/Users/tamer/Documents/programming/python/ImgControl_py/testFolder")
+        self.images = buildDirStructure("C:/Users/tamer/Documents/programming/python/ImgControl_py/avifFolder")
         self.imgId = random.randint(0,len(self.images)-1)
         imgName = self.images[self.imgId]
         self.frame.imgName = imgName
@@ -202,7 +203,7 @@ class ImgFrame(QGraphicsView):
         self.myScene = QGraphicsScene()
         self.myScene.setSceneRect(0,0,width,height)
         self.myScene.setBackgroundBrush(QColor(200,220,200))
-
+        self.backgroundPixmap = None
 
         self.setScene(self.myScene)
 
@@ -221,6 +222,7 @@ class ImgFrame(QGraphicsView):
                                Qt.AspectRatioMode.KeepAspectRatio)
         pixmap2.setPixmap(pixmap)
         self.pixmap2 = pixmap2
+        self.fullPixmap = None
         self.scene().addItem(pixmap2)
         self.scene().setBackgroundBrush(0)
         self.imgName = ""
@@ -230,6 +232,18 @@ class ImgFrame(QGraphicsView):
 
     def resizeEvent(self, event: QResizeEvent | None) -> None:
         super().resizeEvent(event)
+        if self.fullPixmap == None:
+            if self.imgName[-4:] == "avif":
+                print("it's an avif")
+                #self.imgName = tempImgName
+
+                # phew, almost done it VERY suboptimally
+                pixmap = QPixmap(os.getcwd() + "/temp.jpg")
+            else:
+                pixmap = QPixmap(self.imgName)
+
+            self.fullPixmap = pixmap
+
         size = event.size()
         target_size = min(size.width(), size.height()) - 1
         x = (size.width() - target_size) // 2
@@ -241,21 +255,25 @@ class ImgFrame(QGraphicsView):
 
         #self.changeBackground(self.scene().
         
-        if self.imgName[-4:] == "avif":
-            print("it's an avif")
-            #self.imgName = tempImgName
+        # if self.imgName[-4:] == "avif":
+        #     print("it's an avif")
+        #     #self.imgName = tempImgName
 
-            # phew, almost done it VERY suboptimally
-            pixmap = QPixmap(os.getcwd() + "/temp.jpg")
-        else:
-            pixmap = QPixmap(self.imgName)
-        pixmap = pixmap.scaled(self.width(), self.height(), Qt.AspectRatioMode.KeepAspectRatio)
-        self.pixmap2.setPixmap(pixmap)
+        #     # phew, almost done it VERY suboptimally
+        #     pixmap = QPixmap(os.getcwd() + "/temp.jpg")
+        # else:
+        #     pixmap = QPixmap(self.imgName)
+
+        #print(pixmap.width(), pixmap.height())
+        #pixmap = pixmap.scaled(self.width(), self.height(), Qt.AspectRatioMode.KeepAspectRatio)
+        #print(self.pixmap2.scale())
+        self.pixmap2.setPixmap(self.fullPixmap.scaled(self.width(), self.height(), Qt.AspectRatioMode.KeepAspectRatio))
         self.pixmap2.setPos((size.width()-self.pixmap2.boundingRect().width()) / 2, (size.height() - self.pixmap2.boundingRect().height()) / 2)
 
 # img is a string?
     def changeBackground(self,img):
         #print(img)
+
         self.imgName = img # maybe not needed?
         print("test", img)
         if os.path.exists(os.getcwd() + "/temp.jpg"):
@@ -272,6 +290,7 @@ class ImgFrame(QGraphicsView):
                                 self.height(),
                                 Qt.AspectRatioMode.KeepAspectRatio)
         self.pixmap2.setPixmap(pixmap)
+        #self.backgroundPixmap = pixmap
         print(self.pixmap2.boundingRect().width())
         self.pixmap2.setPos((self.width()-self.pixmap2.boundingRect().width()) / 2, (self.height()-self.pixmap2.boundingRect().height()) / 2)
 
@@ -494,6 +513,11 @@ class TimerCircle(QGraphicsItemGroup):
                         imgName = self.getNextImg()
                         #print(imgName)
                         self.parentItem().frame.imgName = imgName
+                        
+                        # what
+                        self.parentItem().frame.fullPixmap = QPixmap(imgName)
+
+
                         self.parentItem().frame.changeBackground(imgName)
                         self.parentItem().addToHistory(imgName)
                         print("a", self.parentItem().images[self.parentItem().imgId])
@@ -520,12 +544,16 @@ class TimerCircle(QGraphicsItemGroup):
                         self.parentItem().frame.imgName = imgName
                         self.parentItem().frame.changeBackground(imgName)
                         self.parentItem().addToHistory(imgName)
+                        
                         print("a", self.parentItem().images[self.parentItem().imgId])
                     else:
                         self.parentItem().historyIndex -= 1
                         imgName = self.parentItem().imgHistory[self.parentItem().historyIndex]
                         self.parentItem().frame.imgName = imgName
+                        
                         self.parentItem().frame.changeBackground(imgName)
+                    self.parentItem().frame.fullPixmap = QPixmap(imgName)
+                        
                         
 
 
