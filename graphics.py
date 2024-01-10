@@ -4,7 +4,7 @@ from PyQt6 import QtGui
 from PyQt6.QtGui import QActionEvent, QCloseEvent, QEnterEvent, QFocusEvent, QKeyEvent, QPainter, QShowEvent
 from PyQt6.QtWidgets import *
 from PyQt6.QtGui import *
-from PyQt6.QtCore import QRectF, pyqtSlot, Qt, QPointF
+from PyQt6.QtCore import QRectF, pyqtSlot, Qt, QPointF, QSize
 from PyQt6 import QtCore
 from PyQt6.QtWidgets import QGraphicsSceneHoverEvent, QGraphicsSceneMouseEvent
 from logic import * # ?
@@ -63,12 +63,14 @@ class QuickMenu(QGraphicsItemGroup):
         #self.addToGroup(tempCircle2)
         self.addToGroup(tempCircle3)
         #self.addToGroup(tempCircle4)
+        self.directory = ""
 
         # !!!
         self.images = False
         self.historySize = history_size
         
         if directory != "None":
+            self.directory = directory
             self.images = buildDirStructure(directory)
             self.imgId = random.randint(0,len(self.images)-1) # !!! fix
             imgName = self.images[self.imgId]
@@ -194,26 +196,21 @@ class ImgFrame(QGraphicsView):
     def __init__(self, x, y, width, height):
         super().__init__()
 
+        
         self.myScene = QGraphicsScene()
+        self.setScene(self.myScene)
         self.myScene.setSceneRect(0,0,width,height)
         self.myScene.setBackgroundBrush(QColor(200,220,200))
         self.backgroundPixmap = None
-
-        self.setScene(self.myScene)
         self.move(x,y)
-
-        x = 0
-        y = 0
-        w = 80
-        h = 45
 
         pen = QColor(100,100,100)
         brush = QColor(150,150,150)
 
-        pixmap = QPixmap("cat.jpg")
+        pixmap = QPixmap()
         pixmap2 = QGraphicsPixmapItem()
-        pixmap = pixmap.scaled(int(width),
-                               int(height),
+        pixmap = pixmap.scaled(width,
+                               height,
                                Qt.AspectRatioMode.KeepAspectRatio)
         pixmap2.setPixmap(pixmap)
         self.pixmap2 = pixmap2
@@ -223,6 +220,14 @@ class ImgFrame(QGraphicsView):
         self.imgName = ""
 
         self.itemGroup = QGraphicsItemGroup
+
+
+        # why even
+        if width > 1706 or height > 720:
+            print("but whyyyy")
+            # why. why even does it fix the issue. what the absolute fuck
+            
+        self.resize(QSize(width, height))
 
 
     def resizeEvent(self, event: QResizeEvent | None) -> None:
@@ -239,11 +244,13 @@ class ImgFrame(QGraphicsView):
 
             self.fullPixmap = pixmap
 
+        print(event.size())
         size = event.size()
-        target_size = min(size.width(), size.height()) - 1
-        x = (size.width() - target_size) // 2
-        y = (size.height() - target_size) // 2
+        #target_size = min(size.width(), size.height()) - 1
+        #x = (size.width() - target_size) // 2
+        #y = (size.height() - target_size) // 2
         #self.circle.setRect(x,y,target_size,target_size)
+        print("S", size.width(), size.height())
         self.setSceneRect(0,0,size.width(),size.height())
         #self.item.win_width = size.width() !!!
         #self.item.win_height = size.height() !!!
@@ -315,8 +322,10 @@ class ImgFrame(QGraphicsView):
 
         # write config.txt
         tempConfig = ""
-        tempConfig += str(self.width()) + "\n" + str(self.height()) + "\n" + str(self.pos().x()) + "\n" + str(self.pos().y()) + "\n" + str(int(self.quickMenu.pos().x())) + "\n" + str(int(self.quickMenu.pos().y())) + "\n" + str(int(self.quickMenu.timerCircle.sessionTime/1000)) + "\n" + str(int(self.quickMenu.timerCircle.breakTime/1000)) + "\n"
+        tempConfig += str(self.width()) + "\n" + str(self.height()) + "\n" + str(self.pos().x()) + "\n" + str(self.pos().y()) + "\n" + str(int(self.quickMenu.pos().x())) + "\n" + str(int(self.quickMenu.pos().y())) + "\n" + str(int(self.quickMenu.timerCircle.sessionTime/1000)) + "\n" + str(int(self.quickMenu.timerCircle.breakTime/1000)) + "\n" + str(len(self.quickMenu.imgHistory)) + "\n" + str(self.quickMenu.randomState) + "\n" + self.quickMenu.directory
         print(tempConfig)
+        with open("config.txt", "w") as file:
+            file.write(tempConfig)
 
         return super().closeEvent(a0)
 
@@ -388,6 +397,7 @@ class TestButton(QGraphicsItemGroup):
             # this is supposed to return an array, with all the items?
             filesArray = buildDirStructure(testName)
             if filesArray:
+                self.parentItem().directory = testName
                 self.parentItem().images = filesArray
                 # for name in filesArray:
                 #         print(name)
@@ -712,7 +722,7 @@ class SettingsInput(QLineEdit):
                 tempHistory = int(self.sw.historyInput.text())
             else:
                 return
-            if tempSession > 0 and tempBreak > 0 and tempHistory >= 0:
+            if tempSession > 0 and tempBreak >= 0 and tempHistory > 0:
                 self.qm.timerCircle.sessionTime = tempSession * 1000
                 self.qm.timerCircle.breakTime = tempBreak * 1000
                 self.qm.historySize = tempHistory

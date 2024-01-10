@@ -4,10 +4,7 @@ from graphics import *
 
 if (__name__ == '__main__'):
     
-    if False: #os.path.exists(os.getcwd() + "/config.txt"):
-        ... # all good
-    else:
-        # write that shit
+    if not os.path.exists(os.getcwd() + "/config.txt"): #os.path.exists(os.getcwd() + "/config.txt"):
         tempConfig = """800
 600
 50
@@ -39,7 +36,6 @@ True
     history_size = int(configLines[8])
     random_state = configLines[9]
     directory = configLines[10]
-    
 
     app = QApplication(sys.argv)
     frame = renderImgFrame(window_position_x, window_position_y, window_width, window_height)
