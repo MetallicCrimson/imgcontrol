@@ -6,7 +6,7 @@ from PyQt6.QtWidgets import *
 from PyQt6.QtGui import *
 from PyQt6.QtCore import QRectF, pyqtSlot, Qt, QPointF, QSize
 from PyQt6 import QtCore
-from PyQt6.QtWidgets import QGraphicsSceneHoverEvent, QGraphicsSceneMouseEvent
+from PyQt6.QtWidgets import QGraphicsSceneHoverEvent, QGraphicsSceneMouseEvent, QStyleOptionGraphicsItem, QWidget
 from logic import * # ?
 import math
 import random
@@ -42,26 +42,29 @@ class QuickMenu(QGraphicsItemGroup):
         self.freshlyPressed = False
 
         # Drawing the background
-        tempRect1 = QGraphicsRectItem(x,y+20,17,17) # left square
+        backgroundRect = QGraphicsRectItem(0,0,250,50)
+        backgroundRect.setVisible(False)
+        tempRect1 = QGraphicsRectItem(0,20,17,17) # left square
         tempRect1.setBrush(menuBrush)
-        tempRect2 = QGraphicsRectItem(x+18,y+10,214,37) # middle rect
+        tempRect2 = QGraphicsRectItem(18,10,214,37) # middle rect
         tempRect2.setBrush(menuBrush)
-        tempRect3 = QGraphicsRectItem(x+230,y+20,7,7) # right square
+        tempRect3 = QGraphicsRectItem(230,20,7,7) # right square
         tempRect3.setBrush(menuBrush)
-        tempCircle1 = QGraphicsEllipseItem(x,y+10,37,37)
+        tempCircle1 = QGraphicsEllipseItem(0,10,37,37)
         tempCircle1.setBrush(menuBrush)
-        tempCircle2 = QGraphicsEllipseItem(x,y+10,20,20)
+        tempCircle2 = QGraphicsEllipseItem(0,10,20,20)
         tempCircle2.setBrush(menuBrush)
-        tempCircle3 = QGraphicsEllipseItem(x+212,y+10,37,37)
+        tempCircle3 = QGraphicsEllipseItem(212,10,37,37)
         tempCircle3.setBrush(menuBrush)
-        tempCircle4 = QGraphicsEllipseItem(x+207,y+10,20,20)
+        tempCircle4 = QGraphicsEllipseItem(207,10,20,20)
         tempCircle4.setBrush(menuBrush)
         #self.addToGroup(tempRect1)
-        self.addToGroup(tempRect2)
+        #self.addToGroup(tempRect2)
+        self.addToGroup(backgroundRect)
         #self.addToGroup(tempRect3)
-        self.addToGroup(tempCircle1)
+        #self.addToGroup(tempCircle1)
         #self.addToGroup(tempCircle2)
-        self.addToGroup(tempCircle3)
+        #self.addToGroup(tempCircle3)
         #self.addToGroup(tempCircle4)
         self.directory = ""
 
@@ -69,6 +72,8 @@ class QuickMenu(QGraphicsItemGroup):
         self.images = False
         self.historySize = history_size
         
+        self.painter = QPainter()
+
         if directory != "None":
             self.directory = directory
             self.images = buildDirStructure(directory)
@@ -81,13 +86,13 @@ class QuickMenu(QGraphicsItemGroup):
 
         # Elements of UI: four buttons and the timer circle
         # positions: hardcode? menu size is going to be fixed anyways
-        buttonRandom = TestButton(x+7,y+15,27,27, "random", self.randomState)
-        buttonRestart = TestButton(x+39,y+15,27,27, "restart", None)
-        buttonLeft = TestButton(x+71,y+15,16,27,"left", None)
-        buttonRight = TestButton(x+160,y+15,16,27, "right", None)
-        buttonDirectory = TestButton(x+181,y+15,27,27, "directory", None)
-        buttonSettings = TestButton(x+213,y+15,27,27, "settings", None)
-        timerCircle = TimerCircle(x+88, y-6,72, session_length, break_length, self)
+        buttonRandom = TestButton(7,15,27,27, "random", self.randomState)
+        buttonRestart = TestButton(39,15,27,27, "restart", None)
+        buttonLeft = TestButton(71,15,16,27,"left", None)
+        buttonRight = TestButton(160,15,16,27, "right", None)
+        buttonDirectory = TestButton(181,15,27,27, "directory", None)
+        buttonSettings = TestButton(213,15,27,27, "settings", None)
+        timerCircle = TimerCircle(88, 6,72, session_length, break_length, self)
 
         self.buttonRandom = buttonRandom
         self.buttonRestart = buttonRestart
@@ -108,6 +113,8 @@ class QuickMenu(QGraphicsItemGroup):
         self.setAcceptHoverEvents(True)
         self.win_width = window_width
         self.win_height = window_height
+
+        self.moveBy(x,y)
 
 
         # here? is it a good solution?
@@ -190,6 +197,15 @@ class QuickMenu(QGraphicsItemGroup):
 
         self.imgHistory = tempArray
         self.historyIndex = 0
+
+    # maybe not needed
+    def paint(self, painter: QPainter | None, option: QStyleOptionGraphicsItem | None, widget: QWidget | None = ...) -> None:
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        painter.setBrush(QColorConstants.Black)
+        painter.drawEllipse(0,10,38,38)
+        painter.drawEllipse(212,10,38,38)
+        painter.drawRect(18,10,214,38)
+        return super().paint(painter, option, widget)
 
 
 class ImgFrame(QGraphicsView):
@@ -467,28 +483,48 @@ class TimerCircle(QGraphicsItemGroup):
     def __init__(self,x,y,r, session_length, break_length, qm):
         super().__init__()
         self.setParentItem(qm)
+        # for some reason, using QPen width as a border is kind of janky
+        backgroundRect = QGraphicsRectItem(x,y,r,r)
+        backgroundRect.setVisible(False)
+
+        borderCircle = QGraphicsEllipseItem(x-1,y-1,r+2,r+2)
+        borderCircle.setPen(0)
+        borderCircle.setBrush(0)
         outlineCircle = QGraphicsEllipseItem(x,y,r,r)
-        outlineCircle.setPen(outlinePen)
-        greenCircle = QGraphicsEllipseItem(x,y,r,r)
-        greenCircle.setBrush(QColorConstants.DarkGreen)
-        greenCircle.setPen(circlePen)
-        redCircle = QGraphicsEllipseItem(x,y,r,r)
-        redCircle.setBrush(QColorConstants.Red)
-        redCircle.setPen(circlePen)
+        outlineCircle.setPen(0)
+        outlineCircle.setBrush(QColorConstants.LightGray)
+        # greenCircle = QGraphicsEllipseItem(x,y,r,r)
+        # greenCircle.setBrush(QColorConstants.DarkGreen)
+        # greenCircle.setPen(circlePen)
+        # redCircle = QGraphicsEllipseItem(x,y,r,r)
+        # redCircle.setBrush(QColorConstants.Red)
+        # redCircle.setPen(circlePen)
+        outerCircle = QGraphicsEllipseItem(x+4,y+4,r-8,r-8)
+        outerCircle.setBrush(0)
+        innerCircle = QGraphicsEllipseItem(x+8,y+8,r-16,r-16)
+        innerCircle.setBrush(QColorConstants.LightGray)
+        innerCircle.setPen(QColorConstants.LightGray)
+        self.x_pos = x
+        self.y_pos = y
+        self.r = r
+
 
         tempText1 = QGraphicsSimpleTextItem("2:34") # !!! fix
         tempText1.setFont(QFont("TypeWriter", 15, 0, False))
-        tempText1.setY(greenCircle.boundingRect().center().y() - tempText1.boundingRect().height()/2)
-        tempText1.setX(greenCircle.boundingRect().center().x() - tempText1.boundingRect().width()/2)
+        tempText1.setY(outlineCircle.boundingRect().center().y() - tempText1.boundingRect().height()/2)
+        tempText1.setX(outlineCircle.boundingRect().center().x() - tempText1.boundingRect().width()/2)
 
-        self.addToGroup(outlineCircle)
-        self.addToGroup(greenCircle)
-        self.addToGroup(redCircle)
+        #self.addToGroup(borderCircle)
+        #self.addToGroup(outlineCircle)
+        #self.addToGroup(outerCircle)
+        #self.addToGroup(innerCircle)
         self.addToGroup(tempText1)
+        self.addToGroup(backgroundRect)
         self.tempText1 = tempText1
 
-        self.greenCircle = greenCircle
-        self.redCircle = redCircle
+        self.outerCircle = outerCircle
+        self.innerCircle = innerCircle
+        self.outerCircle.setStartAngle(1440)
         self.center = (outlineCircle.boundingRect().x()+outlineCircle.boundingRect().width()/2, outlineCircle.boundingRect().y()+outlineCircle.boundingRect().height()/2)
         self.radius = outlineCircle.boundingRect().width()/2
 
@@ -509,12 +545,13 @@ class TimerCircle(QGraphicsItemGroup):
         self.currentTime = self.sessionTime
         self.parentItem().currentState = "session"
         self.timer.start()
-        self.repaint()
+        #self.repaint()
 
     def update_time(self):
         if self.currentTime >= self.interval:
             self.currentTime -= self.interval
             self.repaint()
+            self.update()
         else:
             # changes of state here?
             match self.parentItem().currentState:
@@ -591,11 +628,7 @@ class TimerCircle(QGraphicsItemGroup):
         
         angle = int(5760 * (self.currentTime/fullTime))
 
-        self.greenCircle.setStartAngle(1440)
-        self.greenCircle.setSpanAngle(angle)
-
-        self.redCircle.setStartAngle(1440)
-        self.redCircle.setSpanAngle(-5760+angle)
+        self.outerCircle.setSpanAngle(angle)
 
         remaining = int(time/1000)
         (minutes, seconds) = (math.floor(remaining/60), (remaining % 60))
@@ -631,7 +664,6 @@ class TimerCircle(QGraphicsItemGroup):
         imgName = self.parentItem().images[self.parentItem().imgId]
         return imgName
 
-        
     #def __init__(self, x, y, r):
     #    super().__init__(x, y, r, r)
     #    self.setBrush(QColorConstants.DarkGreen)
@@ -642,6 +674,27 @@ class TimerCircle(QGraphicsItemGroup):
     #def paint(self, painter=None, style=None, widget=None):
     #    painter.fillRect(self, menuBrush.color())
 
+
+    def paint(self, painter: QPainter | None, option: QStyleOptionGraphicsItem | None, widget: QWidget | None = ...) -> None:
+        if self.parentItem().currentState == "session":
+            fullTime = self.sessionTime
+        else:
+            fullTime = self.breakTime
+        
+        angle = int(5760 * (self.currentTime/fullTime))
+
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        painter.setBrush(QColorConstants.Black)
+        painter.drawEllipse(self.x_pos-1,self.y_pos-1,self.r+2,self.r+2) # border circle
+        painter.setBrush(QColorConstants.LightGray)
+        painter.drawEllipse(self.x_pos,self.y_pos,self.r,self.r) # outer circle
+        tempPen = QPen(QColorConstants.Black)
+        tempPen.setWidth(4)
+        painter.setPen(tempPen)
+        # (x+4,y+4,r-8,r-8)
+        painter.drawArc(self.x_pos+5,self.y_pos+5,self.r-10,self.r-10, 1440,angle)
+
+        return super().paint(painter, option, widget)
 
     #tempCircle = QGraphicsEllipseItem(x+((menu_width-66)/2), y-((66-menu_height)/2), 66, 66)
 

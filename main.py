@@ -43,7 +43,7 @@ True
     #bg_img = BackgroundImg(window_width, window_height)
     #print(quick_menu)
     #timer = Timer(quick_menu.timerCircle)
-    #timer.start()
+    #timer.start()☻
 
     ## testing file stuff!
     #newButton = TestButton()
