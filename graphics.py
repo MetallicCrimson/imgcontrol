@@ -1,7 +1,7 @@
 import sys
 import typing
 from PyQt6 import QtGui
-from PyQt6.QtGui import QActionEvent, QCloseEvent, QEnterEvent, QFocusEvent, QKeyEvent, QPainter, QShowEvent
+from PyQt6.QtGui import QActionEvent, QCloseEvent, QEnterEvent, QFocusEvent, QKeyEvent, QMouseEvent, QPainter, QShowEvent
 from PyQt6.QtWidgets import *
 from PyQt6.QtGui import *
 from PyQt6.QtCore import QRectF, pyqtSlot, Qt, QPointF, QSize
@@ -30,14 +30,17 @@ randomOffColor = QColor(60,60,60)
 randomOnHoverColor = QColor(50,50,50)
 
 class QuickMenu(QGraphicsItemGroup):
-    def __init__(self,window_width, window_height, x, y, session_length, break_length, history_size, random_state, directory, frame): # possibly more...?
+    def __init__(self,window_width, window_height, x, y, session_length, break_length, history_size, random_state, directory, history, frame): # possibly more...?
         super().__init__()
         #self.setPos(x,y)
 
         # what
         self.frame = frame
         self.currentState = "session"
-        self.randomState = random_state
+        if random_state == "True":
+            self.randomState = True
+        else:
+            self.randomState = False
 
         # is there another way to check if the menu has been moved?
         # most likely yes. oh whatever
@@ -68,23 +71,48 @@ class QuickMenu(QGraphicsItemGroup):
         #self.addToGroup(tempCircle2)
         #self.addToGroup(tempCircle3)
         #self.addToGroup(tempCircle4)
-        self.directory = ""
 
         # !!!
         self.images = False
         self.historySize = history_size
-        
+        self.historyIndex = 0
+
+
         self.painter = QPainter()
 
-        if directory != "None":
+        if directory != None:
             self.directory = directory
             self.images = buildDirStructure(directory)
-            self.imgId = random.randint(0,len(self.images)-1) # !!! fix
-            imgName = self.images[self.imgId]
-            self.frame.imgName = imgName
-            self.frame.changeBackground(imgName)
-            self.resetHistory()
-            self.imgHistory[0] = self.frame.imgName
+            #print(self.images)
+            #self.imgId = random.randint(0,len(self.images)-1) # !!! fix
+
+            if history:
+                #print(history)
+                self.imgHistory = history
+                imgName = history[0]
+                self.frame.imgName = imgName
+                self.frame.changeBackground(imgName)
+                self.imgId = self.images.index(imgName)
+
+            else:
+                self.imgId = -1
+                self.resetHistory()
+                # if self.randomState:
+                #     self.imgId = random.randint(0,len(self.images)-1)
+                # else:
+                #     print("Setting imgId to 0")
+                #     self.imgId = 0
+                imgName = self.images[self.imgId]
+
+                self.frame.imgName = imgName
+                self.frame.changeBackground(imgName)
+                self.imgHistory[0] = self.frame.imgName
+        else:
+            # guess it wasn't that bad of a todo after all
+            self.directory = None
+            self.images = None
+            self.imgId = -1
+
 
         # Elements of UI: four buttons and the timer circle
         # positions: hardcode? menu size is going to be fixed anyways
@@ -399,13 +427,18 @@ class ImgFrame(QGraphicsView):
         if self.quickMenu.settingsWindow.isVisible:
             self.quickMenu.settingsWindow.close()
         
+        print(self.quickMenu.historyIndex)
+
         if os.path.exists(os.getcwd() + "/temp.jpg"):
             os.remove(os.getcwd() + "/temp.jpg")
 
         # write config.txt
         tempConfig = ""
         tempConfig += str(self.width()) + "\n" + str(self.height()) + "\n" + str(self.pos().x()) + "\n" + str(self.pos().y()) + "\n" + str(int(self.quickMenu.pos().x())) + "\n" + str(int(self.quickMenu.pos().y())) + "\n" + str(int(self.quickMenu.timerCircle.sessionTime/1000)) + "\n" + str(int(self.quickMenu.timerCircle.breakTime/1000)) + "\n" + str(len(self.quickMenu.imgHistory)) + "\n" + str(self.quickMenu.randomState) + "\n" + self.quickMenu.directory
-        print(tempConfig)
+        for item in self.quickMenu.imgHistory:
+            tempConfig += "\n" + str(item)
+
+        #print(tempConfig)
         with open("config.txt", "w") as file:
             file.write(tempConfig)
 
@@ -418,8 +451,8 @@ def renderImgFrame(x,y,width,height):
     return tempImgFrame
 
 
-def renderQuickMenu(window_width, window_height, menu_position_x, menu_position_y, session_length, break_length, history_size, random_state, directory, frame):
-    tempMenu = QuickMenu(window_width, window_height, menu_position_x, menu_position_y, session_length, break_length, history_size, random_state, directory, frame)
+def renderQuickMenu(window_width, window_height, menu_position_x, menu_position_y, session_length, break_length, history_size, random_state, directory, history, frame):
+    tempMenu = QuickMenu(window_width, window_height, menu_position_x, menu_position_y, session_length, break_length, history_size, random_state, directory, history, frame)
 
     return tempMenu
 
@@ -440,8 +473,8 @@ class TestButton(QGraphicsItemGroup):
         
         # that's important to initializing! ...?
         if self.purpose == "random" and not flag:
-            innerText.setPen(QColorConstants.Black)
-            innerText.setBrush(QColorConstants.Black)
+            innerText.setPen(randomOffColor)
+            innerText.setBrush(randomOffColor)
 
         self.buttonRect = tempRect.boundingRect()
 
@@ -475,7 +508,6 @@ class TestButton(QGraphicsItemGroup):
             innerText.setX(innerText.x() + 1)
     
     def hoverFunct(self):
-        #print(self.purpo se)
         if not (self.purpose == "random" and not self.parentItem().randomState):
             self.innerText.setPen(QColorConstants.DarkGray)
             self.innerText.setBrush(QColorConstants.DarkGray)
@@ -505,12 +537,16 @@ class TestButton(QGraphicsItemGroup):
 
 
     def testFunct(self):
+        if (self.parentItem().directory == None and not (self.purpose == "directory" or self.purpose == "settings" or self.purpose == "random")):
+            print("What")
+            return
         print(self.purpose, "has been pressed")
         if self.purpose == "directory":
             self.fresh_change = True
             self.parentItem().timerCircle.timer.stop()
             testName = QFileDialog.getExistingDirectory()
-            self.parentItem().timerCircle.timer.start()
+            # Why the hell was the line below there?
+            #self.parentItem().timerCircle.timer.start()
             # this is supposed to return an array, with all the items?
             filesArray = buildDirStructure(testName)
             if filesArray:
@@ -529,7 +565,9 @@ class TestButton(QGraphicsItemGroup):
                 self.innerText.setBrush(QColorConstants.Blue)
                 #self.hoverOff()
             else:
-                self.parentItem().timerCircle.timer.start()
+                print("Dir:", self.parentItem().directory)
+                if self.parentItem().directory != None:
+                    self.parentItem().timerCircle.timer.start()
         elif self.purpose == "right":
             self.parentItem().currentState = "break"
             self.parentItem().timerCircle.currentTime = 0
@@ -636,15 +674,16 @@ class TimerCircle(QGraphicsItemGroup):
 
         self.sessionTime = session_length * 1000
         self.breakTime = break_length * 1000
-        self.currentTime = self.sessionTime
+        self.currentTime = self.sessionTime - 50
         self.interval = 50
 
         self.timer = QTimer()
         self.timer.setInterval(50)
         self.timer.timeout.connect(self.update_time)
 
-        if self.parentItem().images:
-            self.timer.start()
+        self.repaint()
+        #if self.parentItem().images:
+        #    self.timer.start()
 
     def restart_time(self):
         self.currentTime = self.sessionTime
@@ -678,7 +717,7 @@ class TimerCircle(QGraphicsItemGroup):
 
                         self.parentItem().frame.changeBackground(imgName)
                         self.parentItem().addToHistory(imgName)
-                        print("a", self.parentItem().images[self.parentItem().imgId])
+                        #print("a", self.parentItem().images[self.parentItem().imgId])
 
                         # self.currentTime = self.sessionTime
                         # newImg = self.images[random.randint(0,len(self.parentItem().images)-1)]
@@ -698,12 +737,12 @@ class TimerCircle(QGraphicsItemGroup):
                         
                         #print(self.parentItem().imgHistory)
                         imgName = self.getNextImg()
-                        #print(imgName)
+                        print(imgName)
                         self.parentItem().frame.imgName = imgName
                         self.parentItem().frame.changeBackground(imgName)
                         self.parentItem().addToHistory(imgName)
                         
-                        print("a", self.parentItem().images[self.parentItem().imgId])
+                        #print("a", self.parentItem().images[self.parentItem().imgId])
                     else:
                         self.parentItem().historyIndex -= 1
                         imgName = self.parentItem().imgHistory[self.parentItem().historyIndex]
@@ -721,6 +760,10 @@ class TimerCircle(QGraphicsItemGroup):
 
 
     def testFunct(self):
+        # well, more shit to refactor
+        if self.parentItem().directory == None:
+            return
+
         if self.timer.isActive():
             self.timer.stop()
         else:
@@ -752,7 +795,8 @@ class TimerCircle(QGraphicsItemGroup):
         # self.redCircle.setSpanAngle(5760 - int(time))
 
     def getNextImg(self):
-        print("H", self.parentItem().imgHistory)
+        #print("H", self.parentItem().imgHistory)
+        #print("R", self.parentItem().images)
         if self.parentItem().randomState:
             tempList = list(set(self.parentItem().images) - set(self.parentItem().imgHistory))
             if len(tempList) == 0:
@@ -765,9 +809,11 @@ class TimerCircle(QGraphicsItemGroup):
                 tempId = self.parentItem().images.index(tempImg)
                 self.parentItem().imgId = tempId
             else:
+                # what the fuck
                 tempId = random.randint(0,len(tempList)-1)
                 self.parentItem().imgId = self.parentItem().images.index(tempList[tempId])
         else:
+            print(self.parentItem().imgId)
             self.parentItem().imgId += 1
             if self.parentItem().imgId >= len(self.parentItem().images):
                 self.parentItem().imgId = 0
@@ -864,7 +910,11 @@ class SettingsWindow(QWidget):
     def showEvent(self, a0: QShowEvent | None) -> None:
         self.sessionTimeInput.setText(str(int(self.qm.timerCircle.sessionTime/1000)))
         self.breakTimeInput.setText(str(int(self.qm.timerCircle.breakTime/1000)))
-        self.historyInput.setText(str(len(self.qm.imgHistory)))
+        if self.qm.directory != None:
+            self.historyInput.setText(str(len(self.qm.imgHistory)))
+            self.saveButton.setEnabled(True)
+        else:
+            self.saveButton.setEnabled(False)
         
         self.saveButton.setText("Saved ✓")
 
@@ -872,7 +922,8 @@ class SettingsWindow(QWidget):
         return super().showEvent(a0)
 
     def closeEvent(self, a0: QCloseEvent | None) -> None:
-        self.qm.timerCircle.timer.start()
+        if self.qm.directory != None:
+            self.qm.timerCircle.timer.start()
 
         return super().closeEvent(a0)
     
@@ -890,6 +941,9 @@ class SettingsInput(QLineEdit):
             self.sw.saveButton.setText("Save")
 
         if a0.key() == Qt.Key.Key_Return or a0.key() == Qt.Key.Key_Enter:
+            if self.qm.directory == None:
+                return
+
             if self.sw.sessionTimeInput.text().isdigit():
                 tempSession = int(self.sw.sessionTimeInput.text())
             else:
@@ -951,8 +1005,11 @@ class SettingsInput(QLineEdit):
         return super().keyReleaseEvent(a0)
     
     def checkInputs(self):
-        #print(self.sw.historyInput.text() == str(len(self.qm.imgHistory)))
-        return self.sw.sessionTimeInput.text() == str(int(self.qm.timerCircle.sessionTime/1000)) and self.sw.breakTimeInput.text() == str(int(self.qm.timerCircle.breakTime/1000)) and self.sw.historyInput.text() == str(len(self.qm.imgHistory))
+        if self.qm.directory == None:
+            return self.sw.sessionTimeInput.text() == str(int(self.qm.timerCircle.sessionTime/1000)) and self.sw.breakTimeInput.text() == str(int(self.qm.timerCircle.breakTime/1000))
+        else:
+            #print(self.sw.historyInput.text() == str(len(self.qm.imgHistory)))
+            return self.sw.sessionTimeInput.text() == str(int(self.qm.timerCircle.sessionTime/1000)) and self.sw.breakTimeInput.text() == str(int(self.qm.timerCircle.breakTime/1000)) and self.sw.historyInput.text() == str(len(self.qm.imgHistory))
     
 class SettingsButton(QPushButton):
     def __init__(self, purpose, sw, qm):
@@ -960,3 +1017,8 @@ class SettingsButton(QPushButton):
         self.purpose = purpose
         self.qm = qm
         super().__init__(str.capitalize(purpose))
+
+    def mouseReleaseEvent(self, e: QMouseEvent | None) -> None:
+        # for a bit later
+        print(self.purpose)
+        return super().mouseReleaseEvent(e)

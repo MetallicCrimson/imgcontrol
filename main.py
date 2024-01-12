@@ -4,6 +4,8 @@ from graphics import *
 
 if (__name__ == '__main__'):
     
+    tempDirTest = os.getcwd() + "/testFolder"
+
     if not os.path.exists(os.getcwd() + "/config.txt"): #os.path.exists(os.getcwd() + "/config.txt"):
         tempConfig = """800
 600
@@ -14,8 +16,9 @@ if (__name__ == '__main__'):
 10
 30
 20
-True
-""" + os.getcwd() + "/testFolder"
+False
+None
+"""
 
         f = open("config.txt", "w")
         f.write(tempConfig)
@@ -36,10 +39,16 @@ True
     history_size = int(configLines[8])
     random_state = configLines[9]
     directory = configLines[10]
+    if directory == "None":
+        directory = None
+    history = configLines[11:]
+    for i in range(len(history)):
+        if history[i] == "False":
+            history[i] = False
 
     app = QApplication(sys.argv)
     frame = renderImgFrame(window_position_x, window_position_y, window_width, window_height)
-    quick_menu = renderQuickMenu(window_width, window_height, menu_position_x, menu_position_y, session_length, break_length, history_size, random_state, directory, frame)
+    quick_menu = renderQuickMenu(window_width, window_height, menu_position_x, menu_position_y, session_length, break_length, history_size, random_state, directory, history, frame)
     #bg_img = BackgroundImg(window_width, window_height)
     #print(quick_menu)
     #timer = Timer(quick_menu.timerCircle)
