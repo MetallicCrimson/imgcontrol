@@ -43,7 +43,7 @@ class Timer():
         self._timer = None
 
         # apparently it can be too fast to render...?
-        self.interval = 0.05
+        #self.interval = 0.05
         self.is_running = False
         self.next_call = time.time()
         self.menu = menu
@@ -58,7 +58,7 @@ class Timer():
         self.start()
 
     def start(self):
-        #print("starting timer...?")
+        print("Hola")
         if not self.is_running:
             self.next_call += self.interval
             self.current_time -= self.interval

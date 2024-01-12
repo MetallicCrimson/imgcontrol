@@ -127,6 +127,7 @@ class QuickMenu(QGraphicsItemGroup):
 
     def hoverEnterEvent(self, event: QGraphicsSceneHoverEvent) -> None:
         #print(event.pos())
+        return
         if (self.buttonRandom.buttonRect.contains(event.pos())):
             self.buttonRandom.hoverOn()
         elif (self.buttonRestart.buttonRect.contains(event.pos())):
@@ -433,8 +434,11 @@ class TestButton(QGraphicsItemGroup):
         innerText.setPen(QColorConstants.Gray)
         innerText.setBrush(QColorConstants.Gray)
         self.innerText = innerText
+
+        if purpose == "directory":
+            self.fresh_change = False
         
-        # that's important to initializing!
+        # that's important to initializing! ...?
         if self.purpose == "random" and not flag:
             innerText.setPen(QColorConstants.Black)
             innerText.setBrush(QColorConstants.Black)
@@ -471,14 +475,20 @@ class TestButton(QGraphicsItemGroup):
             innerText.setX(innerText.x() + 1)
     
     def hoverFunct(self):
+        #print(self.purpo se)
         if not (self.purpose == "random" and not self.parentItem().randomState):
             self.innerText.setPen(QColorConstants.DarkGray)
             self.innerText.setBrush(QColorConstants.DarkGray)
         else:
             self.innerText.setPen(randomOnHoverColor)
             self.innerText.setBrush(randomOnHoverColor)
+        if self.purpose == "directory" and self.fresh_change:
+            self.innerText.setPen(QColorConstants.Gray)
+            self.innerText.setBrush(QColorConstants.Gray)
+            self.fresh_change = False
 
     def hoverOff(self):
+        #print(self.purpose, "2")
         if self.purpose == "random":
             if self.parentItem().randomState:
                 self.innerText.setPen(QColorConstants.Gray)
@@ -489,13 +499,18 @@ class TestButton(QGraphicsItemGroup):
         else:
             self.innerText.setPen(QColorConstants.Gray)
             self.innerText.setBrush(QColorConstants.Gray)
+        if self.purpose == "directory":
+            self.innerText.setPen(QColorConstants.Gray)
+            self.innerText.setBrush(QColorConstants.Gray)
 
 
     def testFunct(self):
         print(self.purpose, "has been pressed")
         if self.purpose == "directory":
+            self.fresh_change = True
             self.parentItem().timerCircle.timer.stop()
             testName = QFileDialog.getExistingDirectory()
+            self.parentItem().timerCircle.timer.start()
             # this is supposed to return an array, with all the items?
             filesArray = buildDirStructure(testName)
             if filesArray:
@@ -510,6 +525,9 @@ class TestButton(QGraphicsItemGroup):
                 self.parentItem().timerCircle.currentTime = 0
                 self.parentItem().resetHistory()
                 self.parentItem().timerCircle.timer.start()
+                self.innerText.setPen(QColorConstants.Blue)
+                self.innerText.setBrush(QColorConstants.Blue)
+                #self.hoverOff()
             else:
                 self.parentItem().timerCircle.timer.start()
         elif self.purpose == "right":
@@ -645,7 +663,9 @@ class TimerCircle(QGraphicsItemGroup):
                     if self.breakTime > 0:
                         self.currentTime = self.breakTime
                         self.parentItem().currentState = "break"
+                        print("Switching to break")
                     else:
+                        print("No break, restarting session")
                         self.currentTime = self.sessionTime
                         imgName = self.getNextImg()
                         #print(imgName)
@@ -667,6 +687,7 @@ class TimerCircle(QGraphicsItemGroup):
                         #self.parentItem().imgId = random.randint(0,len(self.parentItem().images)-1)
                         
                 case "break":
+                    print("Switching to session")
                     self.currentTime = self.sessionTime
                     self.parentItem().currentState = "session"
 

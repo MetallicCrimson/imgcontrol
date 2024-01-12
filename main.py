@@ -43,14 +43,14 @@ True
     #bg_img = BackgroundImg(window_width, window_height)
     #print(quick_menu)
     #timer = Timer(quick_menu.timerCircle)
-    #timer.start()☻s
+    #timer.start()
 
     ## testing file stuff!
-    #newButton = TestButton()
+    #newButton = TestButtosn()
     #newButton.msove(200,200)
     #frame.scene().addWidget(newButton)
     
-    #frame.scene().addItem(bg_img)☻
+    #frame.scene().addItem(bg_img)
     frame.scene().addItem(quick_menu)
     frame.quickMenu = quick_menu
     #frame.quickMenu = quick_menu
