@@ -391,6 +391,34 @@ class ImgFrame(QGraphicsView):
         self.pixmap2.setPixmap(self.fullPixmap.scaled(self.width(), self.height(), Qt.AspectRatioMode.KeepAspectRatio))
         self.pixmap2.setPos((size.width()-self.pixmap2.boundingRect().width()) / 2, (size.height() - self.pixmap2.boundingRect().height()) / 2)
 
+    def keyReleaseEvent(self, event: QKeyEvent | None) -> None:
+        if self.quickMenu.directory == None and (event.key() in [Qt.Key.Key_Space, Qt.Key.Key_T, Qt.Key.Key_Left, Qt.Key.Key_Right]):
+            return
+
+        match event.key():
+            case Qt.Key.Key_Space:
+                if self.quickMenu.currentState == "session" and self.quickMenu.frame.breakMask.isVisible():
+                    self.quickMenu.frame.breakMask.setVisible(False)
+
+                if self.quickMenu.timerCircle.timer.isActive():
+                    self.quickMenu.timerCircle.timer.stop()
+                else:
+                    self.quickMenu.timerCircle.timer.start()
+
+            case Qt.Key.Key_R:
+                self.quickMenu.buttonRandom.testFunct()
+            case Qt.Key.Key_T:
+                self.quickMenu.buttonRestart.testFunct()
+            case Qt.Key.Key_Left:
+                self.quickMenu.buttonLeft.testFunct()
+            case Qt.Key.Key_Right:
+                self.quickMenu.buttonRight.testFunct()
+            case Qt.Key.Key_F:
+                self.quickMenu.buttonDirectory.testFunct()
+            case Qt.Key.Key_S:
+                self.quickMenu.buttonSettings.testFunct()
+        return super().keyReleaseEvent(event)
+
 # img is a string?
     def changeBackground(self,img):
         #print(img)
@@ -570,8 +598,8 @@ class TestButton(QGraphicsItemGroup):
                 self.parentItem().timerCircle.currentTime = 0
                 self.parentItem().resetHistory()
                 self.parentItem().timerCircle.timer.start()
-                self.innerText.setPen(QColorConstants.Blue)
-                self.innerText.setBrush(QColorConstants.Blue)
+                self.innerText.setPen(QColorConstants.Gray)
+                self.innerText.setBrush(QColorConstants.Gray)
                 #self.hoverOff()
             else:
                 print("Dir:", self.parentItem().directory)
