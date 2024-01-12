@@ -126,7 +126,7 @@ class QuickMenu(QGraphicsItemGroup):
 
 
     def hoverEnterEvent(self, event: QGraphicsSceneHoverEvent) -> None:
-        print(event.pos())
+        #print(event.pos())
         if (self.buttonRandom.buttonRect.contains(event.pos())):
             self.buttonRandom.hoverOn()
         elif (self.buttonRestart.buttonRect.contains(event.pos())):
@@ -471,7 +471,6 @@ class TestButton(QGraphicsItemGroup):
             innerText.setX(innerText.x() + 1)
     
     def hoverFunct(self):
-        print(self.parentItem().randomState)
         if not (self.purpose == "random" and not self.parentItem().randomState):
             self.innerText.setPen(QColorConstants.DarkGray)
             self.innerText.setBrush(QColorConstants.DarkGray)
@@ -717,7 +716,7 @@ class TimerCircle(QGraphicsItemGroup):
 
         self.outerCircle.setSpanAngle(angle)
 
-        remaining = int(time/1000)
+        remaining = int(time/1000) + 1
         (minutes, seconds) = (math.floor(remaining/60), (remaining % 60))
         if len(str(seconds)) == 1:
             seconds = "0" + str(seconds)
@@ -768,7 +767,7 @@ class TimerCircle(QGraphicsItemGroup):
         else:
             fullTime = self.breakTime
         
-        angle = int(5760 * (self.currentTime/fullTime))
+        angle = int(5760 * (self.currentTime/fullTime)) - 100
 
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         painter.setBrush(QColorConstants.Black)
@@ -776,15 +775,27 @@ class TimerCircle(QGraphicsItemGroup):
         painter.setBrush(QColorConstants.LightGray)
         painter.drawEllipse(self.x_pos+1,self.y_pos+1,self.r-2,self.r-2) # outer circle
         tempPen = QPen(QColorConstants.Black)
-        tempPen.setWidth(4)
+        tempPen.setWidth(5)
         painter.setPen(tempPen)
         # (x+4,y+4,r-8,r-8)
-        painter.drawArc(self.x_pos+6,self.y_pos+6,self.r-12,self.r-12, 1440,angle)
+        if angle < 50 :
+            tempAngle = 50
+        else:
+            tempAngle = angle
+        painter.drawArc(self.x_pos+6,self.y_pos+6,self.r-12,self.r-12, 1440,tempAngle-50)
 
-        #painter.setPen(QColorConstants.Black)
-        #painter.setBrush(QColorConstants.Black)
-        #painter.drawEllipse(self.x_pos + int(self.r / 2), self.y_pos + 4,3,3)
-        #painter.drawEllipse(self.x_pos+30,30,4,4)
+        painter.setPen(QColorConstants.Black)
+        painter.setBrush(QColorConstants.Black)
+        painter.drawEllipse(self.x_pos + int(self.r / 2), self.y_pos + 4,4,4)
+        origin_x = self.x_pos + self.r/2 - 2
+        origin_y = self.y_pos + self.r/2 - 2
+
+        theta = angle / 5760 * 2 * math.pi + (math.pi / 2)
+        
+        #theta -= math.pi/4
+        painter.setBrush(QColorConstants.Black)
+        #print(math.cos(theta), math.sin(theta))
+        painter.drawEllipse(int(origin_x + math.cos(theta) * (self.r/2-6)), int(origin_y - math.sin(theta) * (self.r/2-6)), 5, 5)
 
         return super().paint(painter, option, widget)
 
@@ -868,15 +879,22 @@ class SettingsInput(QLineEdit):
             else:
                 return
             if tempSession > 0 and tempBreak >= 0 and tempHistory > 0:
+                self.qm.timerCircle.currentTime = tempSession * 1000
                 self.qm.timerCircle.sessionTime = tempSession * 1000
                 self.qm.timerCircle.breakTime = tempBreak * 1000
                 self.qm.historySize = tempHistory
                 self.qm.resetHistory()
-                self.qm.timerCircle.currentState = "session"
-                self.qm.timerCircle.currentTime = self.qm.timerCircle.sessionTime
+                self.qm.timerCircle.parentItem().currentState = "session"
                 self.sw.saveButton.setText("Saved ✓")
+
+                # why
         elif a0.key() == Qt.Key.Key_Escape:
             self.sw.close()
+
+    def closeEvent(self, a0: QCloseEvent | None) -> None:
+        #self.qm.timerCircle.update()
+
+        return super().closeEvent(a0)
 
 
         # match self.purpose:
