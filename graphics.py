@@ -274,6 +274,8 @@ class QuickMenu(QGraphicsItemGroup):
         tempSize = min(self.historySize, len(self.images))
         for i in range(tempSize): # how much, exactly?
             tempArray.append(False)
+        print(self.frame.imgName)
+        tempArray[0] = self.frame.imgName
 
         self.imgHistory = tempArray
         self.historyIndex = 0
@@ -322,11 +324,17 @@ class ImgFrame(QGraphicsView):
         self.pixmap2 = pixmap2
         self.fullPixmap = None
         self.scene().addItem(pixmap2)
+
+        breakMask = QGraphicsRectItem(0,0,width,height)
+        breakMask.setPen(QColor(0,0,0,0))
+        breakMask.setBrush(QColor(0,0,0,150))
+        
+        self.breakMask = breakMask
         self.scene().setBackgroundBrush(0)
         self.imgName = ""
 
         self.itemGroup = QGraphicsItemGroup
-
+        self.scene().addItem(breakMask)
 
         # why even
         if width > 1706 or height > 720:
@@ -360,6 +368,7 @@ class ImgFrame(QGraphicsView):
         #self.circle.setRect(x,y,target_size,target_size)
         #print("S", size.width(), size.height())
         self.setSceneRect(0,0,size.width(),size.height())
+        self.breakMask.setRect(0,0,size.width(),size.height())
         self.quickMenu.reposition()
         #self.quickMenu.moveBy(tempXmove, tempYmove)
         #self.item.win_width = size.width() !!!
@@ -671,7 +680,6 @@ class TimerCircle(QGraphicsItemGroup):
         self.center = (outlineCircle.boundingRect().x()+outlineCircle.boundingRect().width()/2, outlineCircle.boundingRect().y()+outlineCircle.boundingRect().height()/2)
         self.radius = outlineCircle.boundingRect().width()/2
 
-
         self.sessionTime = session_length * 1000
         self.breakTime = break_length * 1000
         self.currentTime = self.sessionTime - 50
@@ -703,9 +711,9 @@ class TimerCircle(QGraphicsItemGroup):
                     if self.breakTime > 0:
                         self.currentTime = self.breakTime
                         self.parentItem().currentState = "break"
-                        print("Switching to break")
+                        self.parentItem().frame.breakMask.setVisible(True)
                     else:
-                        print("No break, restarting session")
+                        #print("No break, restarting session")
                         self.currentTime = self.sessionTime
                         imgName = self.getNextImg()
                         #print(imgName)
@@ -727,9 +735,10 @@ class TimerCircle(QGraphicsItemGroup):
                         #self.parentItem().imgId = random.randint(0,len(self.parentItem().images)-1)
                         
                 case "break":
-                    print("Switching to session")
+                    self.parentItem().frame.breakMask.setVisible(False)
                     self.currentTime = self.sessionTime
                     self.parentItem().currentState = "session"
+
 
                     #self.parentItem().imgId = random.randint(0,len(self.parentItem().images)-1)
                     if self.parentItem().historyIndex == 0:
@@ -760,6 +769,12 @@ class TimerCircle(QGraphicsItemGroup):
 
 
     def testFunct(self):
+        if self.parentItem().currentState == "break":
+            self.parentItem().frame.breakMask.setVisible(True)
+        else:
+            self.parentItem().frame.breakMask.setVisible(False)
+            print("Hola")
+    
         # well, more shit to refactor
         if self.parentItem().directory == None:
             return
@@ -842,7 +857,12 @@ class TimerCircle(QGraphicsItemGroup):
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         painter.setBrush(QColorConstants.Black)
         painter.drawEllipse(self.x_pos,self.y_pos,self.r,self.r) # border circle
-        painter.setBrush(QColorConstants.LightGray)
+
+        # maybe here?
+        if self.parentItem().currentState == "session":
+            painter.setBrush(QColorConstants.LightGray)
+        else:
+            painter.setBrush(QColor(250,215,160))
         painter.drawEllipse(self.x_pos+1,self.y_pos+1,self.r-2,self.r-2) # outer circle
         tempPen = QPen(QColorConstants.Black)
         tempPen.setWidth(5)
@@ -961,7 +981,8 @@ class SettingsInput(QLineEdit):
                 self.qm.timerCircle.sessionTime = tempSession * 1000
                 self.qm.timerCircle.breakTime = tempBreak * 1000
                 self.qm.historySize = tempHistory
-                self.qm.resetHistory()
+                if len(self.qm.imgHistory) != tempHistory:
+                    self.qm.resetHistory()
                 self.qm.timerCircle.parentItem().currentState = "session"
                 self.sw.saveButton.setText("Saved ✓")
 
