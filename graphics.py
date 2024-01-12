@@ -626,6 +626,7 @@ class TimerCircle(QGraphicsItemGroup):
         self.addToGroup(backgroundRect)
         self.tempText1 = tempText1
 
+        self.outlineCircle = outlineCircle
         self.outerCircle = outerCircle
         self.innerCircle = innerCircle
         self.outerCircle.setStartAngle(1440)
@@ -744,6 +745,8 @@ class TimerCircle(QGraphicsItemGroup):
         clockText = str(minutes) + ":" + str(seconds)
 
         self.tempText1.setText(clockText)
+        self.tempText1.setY(self.outlineCircle.boundingRect().center().y() - self.tempText1.boundingRect().height()/2)
+        self.tempText1.setX(self.outlineCircle.boundingRect().center().x() - self.tempText1.boundingRect().width()/2)
         # self.greenCircle.setSpanAngle(int(time))
         # self.redCircle.setStartAngle(int(time))
         # self.redCircle.setSpanAngle(5760 - int(time))

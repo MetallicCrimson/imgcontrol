@@ -48,7 +48,7 @@ True
     ## testing file stuff!
     #newButton = TestButtosn()
     #newButton.msove(200,200)
-    #frame.scene().addWidget(newButton)
+    #frame.scene().addWidget(newButton)☻
     
     #frame.scene().addItem(bg_img)
     frame.scene().addItem(quick_menu)
