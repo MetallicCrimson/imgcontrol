@@ -47,7 +47,7 @@ True
 
     ## testing file stuff!
     #newButton = TestButton()
-    #newButton.move(200,200)
+    #newButton.msove(200,200)
     #frame.scene().addWidget(newButton)
     
     #frame.scene().addItem(bg_img)☻

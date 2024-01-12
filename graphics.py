@@ -17,8 +17,8 @@ import math
 # ⭝ ⭜ 
 
 # some constants
-menu_width = 200
-menu_height = 50
+menu_width = 252
+menu_height = 77
 outlinePen = QPen()
 outlinePen.setWidth(3)
 circlePen = QPen()
@@ -26,6 +26,8 @@ circlePen.setWidth(0)
 # this solution is fucking cursed. setting a color as a brush?
 # then what is the point of a brush object?
 menuBrush = QColor(0,0,0)
+randomOffColor = QColor(60,60,60)
+randomOnHoverColor = QColor(50,50,50)
 
 class QuickMenu(QGraphicsItemGroup):
     def __init__(self,window_width, window_height, x, y, session_length, break_length, history_size, random_state, directory, frame): # possibly more...?
@@ -42,7 +44,7 @@ class QuickMenu(QGraphicsItemGroup):
         self.freshlyPressed = False
 
         # Drawing the background
-        backgroundRect = QGraphicsRectItem(0,0,250,50)
+        backgroundRect = QGraphicsRectItem(0,0,249,74)
         backgroundRect.setVisible(False)
         tempRect1 = QGraphicsRectItem(0,20,17,17) # left square
         tempRect1.setBrush(menuBrush)
@@ -86,13 +88,13 @@ class QuickMenu(QGraphicsItemGroup):
 
         # Elements of UI: four buttons and the timer circle
         # positions: hardcode? menu size is going to be fixed anyways
-        buttonRandom = TestButton(7,15,27,27, "random", self.randomState)
-        buttonRestart = TestButton(39,15,27,27, "restart", None)
-        buttonLeft = TestButton(71,15,16,27,"left", None)
-        buttonRight = TestButton(160,15,16,27, "right", None)
-        buttonDirectory = TestButton(181,15,27,27, "directory", None)
-        buttonSettings = TestButton(213,15,27,27, "settings", None)
-        timerCircle = TimerCircle(88, 6,72, session_length, break_length, self)
+        buttonRandom = TestButton(7,23,27,27, "random", self.randomState)
+        buttonRestart = TestButton(39,23,27,27, "restart", None)
+        buttonLeft = TestButton(71,23,16,27,"left", None)
+        buttonRight = TestButton(162,23,16,27, "right", None)
+        buttonDirectory = TestButton(183,23,27,27, "directory", None)
+        buttonSettings = TestButton(215,23,27,27, "settings", None)
+        timerCircle = TimerCircle(88,0,74, session_length, break_length, self)
 
         self.buttonRandom = buttonRandom
         self.buttonRestart = buttonRestart
@@ -113,6 +115,8 @@ class QuickMenu(QGraphicsItemGroup):
         self.setAcceptHoverEvents(True)
         self.win_width = window_width
         self.win_height = window_height
+        self.x_pos = x
+        self.y_pos = y
 
         self.moveBy(x,y)
 
@@ -122,10 +126,57 @@ class QuickMenu(QGraphicsItemGroup):
 
 
     def hoverEnterEvent(self, event: QGraphicsSceneHoverEvent) -> None:
-        print("Hovered")
+        print(event.pos())
+        if (self.buttonRandom.buttonRect.contains(event.pos())):
+            self.buttonRandom.hoverOn()
+        elif (self.buttonRestart.buttonRect.contains(event.pos())):
+            self.buttonRestart.hoverOn()
+        elif (self.buttonLeft.buttonRect.contains(event.pos())):
+            self.buttonLeft.hoverOn()
+        elif (self.buttonRight.buttonRect.contains(event.pos())):
+            self.buttonRight.hoverOn()
+        elif (self.buttonDirectory.buttonRect.contains(event.pos())):
+            self.buttonDirectory.hoverOn()
+        elif (self.buttonSettings.buttonRect.contains(event.pos())):
+            self.buttonSettings.hoverOn()
         return super().hoverEnterEvent(event)
     
+    def hoverMoveEvent(self, event: QGraphicsSceneHoverEvent | None) -> None:
+        if (self.buttonRandom.buttonRect.contains(event.pos())):
+            self.buttonRandom.hoverFunct()
+        elif (self.buttonRestart.buttonRect.contains(event.pos())):
+            self.buttonRestart.hoverFunct()
+        elif (self.buttonLeft.buttonRect.contains(event.pos())):
+            self.buttonLeft.hoverFunct()
+        elif (self.buttonRight.buttonRect.contains(event.pos())):
+            self.buttonRight.hoverFunct()
+        elif (self.buttonDirectory.buttonRect.contains(event.pos())):
+            self.buttonDirectory.hoverFunct()
+        elif (self.buttonSettings.buttonRect.contains(event.pos())):
+            self.buttonSettings.hoverFunct()
+        else:
+            self.buttonRandom.hoverOff()
+            self.buttonRestart.hoverOff()
+            self.buttonLeft.hoverOff()
+            self.buttonRight.hoverOff()
+            self.buttonDirectory.hoverOff()
+            self.buttonSettings.hoverOff()
+
+        return super().hoverMoveEvent(event)
+    
     def hoverLeaveEvent(self, event: QGraphicsSceneHoverEvent) -> None:
+        if (self.buttonRandom.buttonRect.contains(event.pos())):
+            self.buttonRandom.hoverOff()
+        elif (self.buttonRestart.buttonRect.contains(event.pos())):
+            self.buttonRestart.hoverOff()
+        elif (self.buttonLeft.buttonRect.contains(event.pos())):
+            self.buttonLeft.hoverOff()
+        elif (self.buttonRight.buttonRect.contains(event.pos())):
+            self.buttonRight.hoverOff()
+        elif (self.buttonDirectory.buttonRect.contains(event.pos())):
+            self.buttonDirectory.hoverOff()
+        elif (self.buttonSettings.buttonRect.contains(event.pos())):
+            self.buttonSettings.hoverOff()
         return super().hoverLeaveEvent(event)
     
     def mousePressEvent(self, event: QGraphicsSceneMouseEvent) -> None:
@@ -144,6 +195,8 @@ class QuickMenu(QGraphicsItemGroup):
         updated_pos_x = updated_cursor_position.x() - orig_cursor_position.x() + orig_position.x()
         updated_pos_y = updated_cursor_position.y() - orig_cursor_position.y() + orig_position.y()
 
+        self.x_pos = updated_pos_x
+        self.y_pos = updated_pos_y
         # or maybe here
         self.setPos(QPointF(updated_pos_x, updated_pos_y))
 
@@ -177,12 +230,10 @@ class QuickMenu(QGraphicsItemGroup):
             self.setX(0)
         if (self.pos().y() < 0):
             self.setY(0)
-        if (self.pos().x() > self.win_width-menu_width):
-            print(self.win_width)
-            self.setX(self.win_width-menu_width)
-        if (self.pos().y() > self.win_height-menu_height):
-            print(self.win_height)
-            self.setY(self.win_height-menu_height)
+        if (self.pos().x() > self.frame.width()-menu_width):
+            self.setX(self.frame.width()-menu_width)
+        if (self.pos().y() > self.frame.height()-menu_height):
+            self.setY(self.frame.height()-menu_height)
 
     def addToHistory(self, new):
         self.imgHistory.insert(0,new)
@@ -202,9 +253,19 @@ class QuickMenu(QGraphicsItemGroup):
     def paint(self, painter: QPainter | None, option: QStyleOptionGraphicsItem | None, widget: QWidget | None = ...) -> None:
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         painter.setBrush(QColorConstants.Black)
-        painter.drawEllipse(0,10,38,38)
-        painter.drawEllipse(212,10,38,38)
-        painter.drawRect(18,10,214,38)
+        painter.setPen(QColorConstants.Gray)
+        painter.drawEllipse(0,18,38,38)
+        painter.drawEllipse(212,18,38,38)
+
+        painter.setPen(QColorConstants.Black)
+        painter.drawRect(20,18,212,38)
+
+        painter.setPen(QColorConstants.Gray)
+        painter.drawLine(20,18,232,18)
+        painter.drawLine(20,56,232,56)
+
+        
+        
         return super().paint(painter, option, widget)
 
 
@@ -260,14 +321,18 @@ class ImgFrame(QGraphicsView):
 
             self.fullPixmap = pixmap
 
-        print(event.size())
+        #print(event.size())
         size = event.size()
+        
+
         #target_size = min(size.width(), size.height()) - 1
         #x = (size.width() - target_size) // 2
         #y = (size.height() - target_size) // 2
         #self.circle.setRect(x,y,target_size,target_size)
-        print("S", size.width(), size.height())
+        #print("S", size.width(), size.height())
         self.setSceneRect(0,0,size.width(),size.height())
+        self.quickMenu.reposition()
+        #self.quickMenu.moveBy(tempXmove, tempYmove)
         #self.item.win_width = size.width() !!!
         #self.item.win_height = size.height() !!!
 
@@ -362,7 +427,7 @@ class TestButton(QGraphicsItemGroup):
         super().__init__()
         self.purpose = purpose
         tempRect = QGraphicsRectItem(x,y,w,h)
-        tempRect.setBrush(QColorConstants.DarkMagenta)
+        tempRect.setBrush(QColorConstants.Black)
         innerText = QGraphicsSimpleTextItem()
         innerText.setFont(QFont("TypeWriter", 20,800, False))
         innerText.setPen(QColorConstants.Gray)
@@ -395,15 +460,37 @@ class TestButton(QGraphicsItemGroup):
         self.addToGroup(tempRect)
         self.addToGroup(innerText)
         
+        # hmmm
         innerText.setY(tempRect.boundingRect().center().y() - innerText.boundingRect().height()/2)
         innerText.setX(tempRect.boundingRect().center().x() - innerText.boundingRect().width()/2)
-
-
-    def mouseReleaseEvent(self, event: QGraphicsSceneMouseEvent) -> None:
-
-        print("Button pressed")
-        return super().mouseReleaseEvent(event)
+        if purpose == "left":
+            innerText.setY(innerText.y() - 2)
+            innerText.setX(innerText.x() + 3)
+        if purpose == "right":
+            innerText.setY(innerText.y() - 2)
+            innerText.setX(innerText.x() + 1)
     
+    def hoverFunct(self):
+        print(self.parentItem().randomState)
+        if not (self.purpose == "random" and not self.parentItem().randomState):
+            self.innerText.setPen(QColorConstants.DarkGray)
+            self.innerText.setBrush(QColorConstants.DarkGray)
+        else:
+            self.innerText.setPen(randomOnHoverColor)
+            self.innerText.setBrush(randomOnHoverColor)
+
+    def hoverOff(self):
+        if self.purpose == "random":
+            if self.parentItem().randomState:
+                self.innerText.setPen(QColorConstants.Gray)
+                self.innerText.setBrush(QColorConstants.Gray)
+            else:
+                self.innerText.setPen(randomOffColor)
+                self.innerText.setBrush(randomOffColor)
+        else:
+            self.innerText.setPen(QColorConstants.Gray)
+            self.innerText.setBrush(QColorConstants.Gray)
+
 
     def testFunct(self):
         print(self.purpose, "has been pressed")
@@ -461,8 +548,8 @@ class TestButton(QGraphicsItemGroup):
         elif self.purpose == "random":
             if self.parentItem().randomState:
                 self.parentItem().randomState = False
-                self.innerText.setBrush(QColorConstants.Black)
-                self.innerText.setPen(QColorConstants.Black)
+                self.innerText.setBrush(randomOffColor)
+                self.innerText.setPen(randomOffColor)
             else:
                 self.parentItem().randomState = True
                 self.innerText.setBrush(QColorConstants.Gray)
@@ -685,14 +772,19 @@ class TimerCircle(QGraphicsItemGroup):
 
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         painter.setBrush(QColorConstants.Black)
-        painter.drawEllipse(self.x_pos-1,self.y_pos-1,self.r+2,self.r+2) # border circle
+        painter.drawEllipse(self.x_pos,self.y_pos,self.r,self.r) # border circle
         painter.setBrush(QColorConstants.LightGray)
-        painter.drawEllipse(self.x_pos,self.y_pos,self.r,self.r) # outer circle
+        painter.drawEllipse(self.x_pos+1,self.y_pos+1,self.r-2,self.r-2) # outer circle
         tempPen = QPen(QColorConstants.Black)
         tempPen.setWidth(4)
         painter.setPen(tempPen)
         # (x+4,y+4,r-8,r-8)
-        painter.drawArc(self.x_pos+5,self.y_pos+5,self.r-10,self.r-10, 1440,angle)
+        painter.drawArc(self.x_pos+6,self.y_pos+6,self.r-12,self.r-12, 1440,angle)
+
+        #painter.setPen(QColorConstants.Black)
+        #painter.setBrush(QColorConstants.Black)
+        #painter.drawEllipse(self.x_pos + int(self.r / 2), self.y_pos + 4,3,3)
+        #painter.drawEllipse(self.x_pos+30,30,4,4)
 
         return super().paint(painter, option, widget)
 
