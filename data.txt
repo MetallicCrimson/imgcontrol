@@ -1,3 +1,0 @@
-# Here comes all the data, although it's still not decided if it will be
-# stored based on filenames or folders (they will only provide paths
-# anyway)
