@@ -53,7 +53,12 @@ Image history size: the program keeps track of the last x images for two reasons
 
 Note: hitting Enter saves the inputs (just like clicking the Save button), hitting Esc closes the settings window (without saving).
 Another note: if you want to delete the saved config data, delete config.txt from the folder of the program."""
-aboutText = """about test"""
+aboutText = """This app was developed by Daniel Kovacs, as a request of an artist who got salty for not having a timed viewer for her million quintillion bajillion images (shoutout to Lia).
+
+It was made using Python, with PyQt6 as the graphics library.
+MIT license applies, so you can do anything you want either with this or with the code itself. 
+
+Github page:"""
 
 
 class QuickMenu(QGraphicsItemGroup):
@@ -367,8 +372,12 @@ class ImgFrame(QGraphicsView):
         if width > 1706 or height > 720:
             print("but whyyyy")
             # why. why even does it fix the issue. what the absolute fuck
-            
+
+        # i don't remember why is this here    
         self.resize(QSize(width, height))
+
+        self.setWindowTitle("ImgControl")
+        self.setWindowIcon(QIcon("icon.png"))
 
 
     def resizeEvent(self, event: QResizeEvent | None) -> None:
@@ -984,6 +993,7 @@ class SettingsWindow(QWidget):
         layout.addWidget(self.aboutButton)
         self.setLayout(layout)
         self.setWindowTitle("Settings")
+        self.setWindowIcon(QIcon("icon.png"))
 
         self.qm = qm
 
@@ -1139,6 +1149,7 @@ class SettingsSubWindow(QWidget):
         self.purpose = purpose
         #self.layout().setSpacing(0)
         self.setFixedWidth(600)
+        self.setWindowIcon(QIcon("icon.png"))
 
         if purpose == "help":
             tempLabel0 = QLabel()
@@ -1168,8 +1179,18 @@ class SettingsSubWindow(QWidget):
             self.layout().addWidget(tempLabel4)
             self.layout().addWidget(tempLabel5)
             self.layout().addWidget(tempLabel6)
+
+            self.setWindowTitle("Help")
         else:
-            ...
+            tempLabel1 = QLabel(aboutText)
+            tempLabel1.setWordWrap(True)
+            tempLabel2 = QLabel("<a href=\"https://github.com/SilverCrimson\">https://github.com/SilverCrimson</a>")
+            tempLabel2.setWordWrap(True)
+            tempLabel2.setOpenExternalLinks(True)
+            self.layout().addWidget(tempLabel1)
+            self.layout().addWidget(tempLabel2)
+
+            self.setWindowTitle("About")
 
         self.qm = qm
 
@@ -1190,8 +1211,7 @@ class SettingsSubWindow(QWidget):
 #                 tempText = ""
 #         else:
 #             tempText = aboutText
-        
-        #self.tempLabel.setText(tempText)
+
         return super().showEvent(a0)
 
     def keyReleaseEvent(self, a0: QKeyEvent | None) -> None:
