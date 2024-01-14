@@ -182,7 +182,7 @@ class QuickMenu(QGraphicsItemGroup):
 
 
         # here? is it a good solution?
-        self.settingsWindow = SettingsWindow(self)
+        self.settingsWindow = SettingsWindow(self, self.frame.x(), self.frame.y())
 
 
     def hoverEnterEvent(self, event: QGraphicsSceneHoverEvent) -> None:
@@ -961,7 +961,7 @@ class TimerCircle(QGraphicsItemGroup):
     #tempCircle = QGraphicsEllipseItem(x+((menu_width-66)/2), y-((66-menu_height)/2), 66, 66)
 
 class SettingsWindow(QWidget):
-    def __init__(self, qm):
+    def __init__(self, qm, win_x, win_y):
         super().__init__()
         layout = QVBoxLayout()
         
@@ -974,11 +974,11 @@ class SettingsWindow(QWidget):
         self.historyLabel = QLabel("Image history size:")
         historyInput = SettingsInput("history", self, qm)
         self.historyInput = historyInput
-        saveButton = SettingsButton("save", self, qm)
+        saveButton = SettingsButton("save", self, qm, win_x, win_y)
         self.saveButton = saveButton
-        helpButton = SettingsButton("help", self, qm)
+        helpButton = SettingsButton("help", self, qm, win_x, win_y)
         self.helpButton = helpButton
-        aboutButton = SettingsButton("about", self, qm)
+        aboutButton = SettingsButton("about", self, qm, win_x, win_y)
         self.aboutButton = aboutButton
 
 
@@ -994,6 +994,8 @@ class SettingsWindow(QWidget):
         self.setLayout(layout)
         self.setWindowTitle("Settings")
         self.setWindowIcon(QIcon("icon.png"))
+
+        self.move(win_x + 30, win_y + 30)
 
         self.qm = qm
 
@@ -1119,13 +1121,13 @@ class SettingsInput(QLineEdit):
             return self.sw.sessionTimeInput.text() == str(int(self.qm.timerCircle.sessionTime/1000)) and self.sw.breakTimeInput.text() == str(int(self.qm.timerCircle.breakTime/1000)) and self.sw.historyInput.text() == str(len(self.qm.imgHistory))
     
 class SettingsButton(QPushButton):
-    def __init__(self, purpose, sw, qm):
+    def __init__(self, purpose, sw, qm, win_x, win_y):
         self.sw = sw
         self.purpose = purpose
         self.qm = qm
 
         if purpose in ["help", "about"]:
-            tempWindow = SettingsSubWindow(purpose, qm)
+            tempWindow = SettingsSubWindow(purpose, qm, win_x, win_y)
             self.subWindow = tempWindow
 
         super().__init__(str.capitalize(purpose))
@@ -1142,12 +1144,13 @@ class SettingsButton(QPushButton):
         return super().mouseReleaseEvent(e)
     
 class SettingsSubWindow(QWidget):
-    def __init__(self, purpose, qm):
+    def __init__(self, purpose, qm, win_x, win_y):
         super().__init__()
 
         tempLayout = QVBoxLayout()
         self.setLayout(tempLayout)
         self.resize(0,0)
+        self.move(win_x+60, win_y + 60)
 
 
 
