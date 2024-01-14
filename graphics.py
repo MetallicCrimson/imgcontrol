@@ -1094,7 +1094,7 @@ class SettingsInput(QLineEdit):
         #                     print("changing history. nice")
         #                     self.qm.historySize = temp
         #                     self.qm.resetHistory()
-        return super().keyReleaseEvent(a0)
+        # return super().keyReleaseEvent(a0)
     
     def checkInputs(self):
         if self.qm.directory == None:
@@ -1141,7 +1141,11 @@ class SettingsSubWindow(QWidget):
         self.setFixedWidth(600)
 
         if purpose == "help":
+            tempLabel0 = QLabel()
+            self.tempLabel0 = tempLabel0
+            tempLabel0.setWordWrap(True)
             tempLabel1 = QLabel(helpText1)
+            self.tempLabel1 = tempLabel1
             tempLabel1.setFont(boldFont)
             tempLabel1.setWordWrap(True)
             tempLabel2 = QLabel(helpText2)
@@ -1157,6 +1161,7 @@ class SettingsSubWindow(QWidget):
             tempLabel6 = QLabel(helpText6)
             tempLabel6.setWordWrap(True)
 
+            self.layout().addWidget(tempLabel0)
             self.layout().addWidget(tempLabel1)
             self.layout().addWidget(tempLabel2)
             self.layout().addWidget(tempLabel3)
@@ -1169,8 +1174,12 @@ class SettingsSubWindow(QWidget):
         self.qm = qm
 
     def showEvent(self, a0: QShowEvent | None) -> None:
-
-        print(self.qm.directory)
+        if self.purpose == "help":
+            if self.qm.directory == None:
+                self.tempLabel0.setText("(If this is your first time opening the app, you have to select a directory to get it running. It can't show images without the images...)\n")
+            else:
+                self.tempLabel0.setMaximumHeight(0)
+                self.tempLabel0.setText("")
 
 #         if self.purpose == "help":
 #             if self.qm.directory == None:
