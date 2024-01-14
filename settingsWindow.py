@@ -23,8 +23,8 @@ S: displays the settings window.
 """
 helpText5 = "Inputs in settings:"
 helpText6 = """Session seconds: the length of each drawing session. Lower limit is 1, upper limit is technically nonexistent (except the memory limitations), but please try to end it before the heat death of the universe...
-Break seconds: the option to include a short (or long, you decide) between sessions. Lower limit is 0, in which case it will simply goes to the next image without hesitation.
-Image history size: the program keeps track of the last x images for two reasons: to enable left scrolling, and to not randomly select the images in it (thus eliminating repetition). A size of 50 should be enough for all purposes, but it can handle larger without a problem. Also, if the chosen size cannot be bigger than the number of images in the directory.
+Break seconds: the option to include a short (or long, you decide) break between sessions. Lower limit is 0, in which case it will simply goes to the next image without hesitation.
+Image history size: the program keeps track of the last x images for two reasons: to enable left scrolling, and to not randomly select the images in it (thus eliminating repetition). A size of 50 should be enough for all purposes, but it can handle larger without a problem. Also, the history size cannot be bigger than the number of images in the directory.
 
 
 Note: hitting Enter saves the inputs (just like clicking the Save button), hitting Esc closes the settings window (without saving).

@@ -1,6 +1,5 @@
-## just playing with libraries
 import sys
-from graphics import *
+from imgFrame import *
 
 if (__name__ == '__main__'):
     
@@ -13,8 +12,8 @@ if (__name__ == '__main__'):
 50
 200
 100
+60
 10
-30
 20
 False
 None
@@ -46,8 +45,8 @@ None
             history[i] = False
 
     app = QApplication(sys.argv)
-    frame = renderImgFrame(window_position_x, window_position_y, window_width, window_height)
-    quick_menu = renderQuickMenu(window_width, window_height, menu_position_x, menu_position_y, session_length, break_length, history_size, random_state, directory, history, frame)
+    frame = ImgFrame(window_position_x, window_position_y, window_width, window_height)
+    quick_menu = QuickMenu(window_width, window_height, menu_position_x, menu_position_y, session_length, break_length, history_size, random_state, directory, history, frame)
 
     frame.scene().addItem(quick_menu)
     frame.quickMenu = quick_menu

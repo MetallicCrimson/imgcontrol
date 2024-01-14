@@ -55,12 +55,12 @@ class TimerCircle(QGraphicsItemGroup):
             match self.parentItem().currentState:
                 case "session":
                     if self.breakTime > 0:
+                        self.parentItem().frame.breakMask.setVisible(True)
                         self.currentTime = self.breakTime
                         self.parentItem().currentState = "break"
-                        self.parentItem().frame.breakMask.setVisible(True)
                     else:
                         self.currentTime = self.sessionTime
-                        imgName = getNextImg(self)
+                        imgName = self.getNextImg()
                         self.parentItem().frame.imgName = imgName
                         self.parentItem().frame.changeBackground(imgName)
                         self.parentItem().addToHistory(imgName)
@@ -70,8 +70,7 @@ class TimerCircle(QGraphicsItemGroup):
                     self.currentTime = self.sessionTime
                     self.parentItem().currentState = "session"
                     if self.parentItem().historyIndex == 0:
-                        imgName = getNextImg(self)
-                        print(imgName)
+                        imgName = self.getNextImg()
                         self.parentItem().frame.imgName = imgName
                         self.parentItem().frame.changeBackground(imgName)
                         self.parentItem().addToHistory(imgName)
@@ -96,6 +95,9 @@ class TimerCircle(QGraphicsItemGroup):
         else:
             self.timer.start()
 
+    def getNextImg(self):
+        return self.parentItem().getNextImg()
+
     def repaint(self):
         time = self.currentTime
 
@@ -118,7 +120,7 @@ class TimerCircle(QGraphicsItemGroup):
         angle = int(5760 * (self.currentTime/fullTime)) - 100
 
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        painter.setBrush(QColorConstants.Black)
+        painter.setBrush(0)
         painter.drawEllipse(self.x_pos,self.y_pos,self.r,self.r) # border circle
 
         if self.parentItem().currentState == "session":
@@ -126,7 +128,7 @@ class TimerCircle(QGraphicsItemGroup):
         else:
             painter.setBrush(QColor(250,215,160))
         painter.drawEllipse(self.x_pos+1,self.y_pos+1,self.r-2,self.r-2) # outer circle
-        tempPen = QPen(QColorConstants.Black)
+        tempPen = QPen(0)
         tempPen.setWidth(5)
         painter.setPen(tempPen)
         if angle < 50 :
@@ -135,14 +137,13 @@ class TimerCircle(QGraphicsItemGroup):
             tempAngle = angle
         painter.drawArc(self.x_pos+6,self.y_pos+6,self.r-12,self.r-12, 1440,tempAngle-50)
 
-        painter.setPen(QColorConstants.Black)
-        painter.setBrush(QColorConstants.Black)
+        painter.setPen(0)
+        painter.setBrush(0)
         painter.drawEllipse(self.x_pos + int(self.r / 2), self.y_pos + 4,4,4)
         origin_x = self.x_pos + self.r/2 - 2
         origin_y = self.y_pos + self.r/2 - 2
 
         theta = angle / 5760 * 2 * math.pi + (math.pi / 2)
-        painter.setBrush(QColorConstants.Black)
         painter.drawEllipse(int(origin_x + math.cos(theta) * (self.r/2-6)), int(origin_y - math.sin(theta) * (self.r/2-6)), 5, 5)
 
         return super().paint(painter, option, widget)

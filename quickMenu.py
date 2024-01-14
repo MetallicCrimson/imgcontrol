@@ -1,4 +1,5 @@
-
+import math
+import random
 from timerCircle import *
 
 menu_width = 252
@@ -10,7 +11,6 @@ class QuickMenu(QGraphicsItemGroup):
     def __init__(self,window_width, window_height, x, y, session_length, break_length, history_size, random_state, directory, history, frame):
         super().__init__()
 
-        # what
         self.frame = frame
         self.currentState = "session"
         if random_state == "True":
@@ -68,8 +68,6 @@ class QuickMenu(QGraphicsItemGroup):
             self.directory = None
             self.images = None
             self.imgId = -1
-
-        print(self.images)
 
         # Elements of UI: six buttons and the timer circle
         buttonRandom = TestButton(7,23,27,27, "random", self.randomState)
@@ -206,7 +204,6 @@ class QuickMenu(QGraphicsItemGroup):
         tempSize = min(self.historySize, len(self.images))
         for i in range(tempSize):
             tempArray.append(False)
-        print(self.frame.imgName)
         tempArray[0] = self.frame.imgName
 
         self.imgHistory = tempArray
@@ -214,12 +211,12 @@ class QuickMenu(QGraphicsItemGroup):
 
     def paint(self, painter: QPainter | None, option: QStyleOptionGraphicsItem | None, widget: QWidget | None = ...) -> None:
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        painter.setBrush(QColorConstants.Black)
+        painter.setBrush(0)
         painter.setPen(QColorConstants.Gray)
         painter.drawEllipse(0,18,38,38)
         painter.drawEllipse(212,18,38,38)
 
-        painter.setPen(QColorConstants.Black)
+        painter.setPen(0)
         painter.drawRect(20,18,212,38)
 
         painter.setPen(QColorConstants.Gray)
@@ -227,13 +224,34 @@ class QuickMenu(QGraphicsItemGroup):
         painter.drawLine(20,56,232,56)
 
         return super().paint(painter, option, widget)
+    
+    def getNextImg(self):
+        if self.randomState:
+            tempList = list(set(self.images) - set(self.imgHistory))
+            if len(tempList) == 0:
+                # with this, it will choose from the last 25% of the imgHistory (rounded up)
+                t = math.ceil(len(self.imgHistory) * .25)
+                t2 = random.randint(1,t)
+
+                tempImg = self.imgHistory[-t2]
+                tempId = self.images.index(tempImg)
+                self.imgId = tempId
+            else:
+                tempId = random.randint(0,len(tempList)-1)
+                self.imgId = self.images.index(tempList[tempId])
+        else:
+            self.imgId += 1
+            if self.imgId >= len(self.images):
+                self.imgId = 0
+        imgName = self.images[self.imgId]
+        return imgName
 
 class TestButton(QGraphicsItemGroup):
     def __init__(self,x,y,w,h,purpose, flag):
         super().__init__()
         self.purpose = purpose
         tempRect = QGraphicsRectItem(x,y,w,h)
-        tempRect.setBrush(QColorConstants.Black)
+        tempRect.setBrush(0)
         innerText = QGraphicsSimpleTextItem()
         innerText.setFont(QFont("TypeWriter", 20,800, False))
         innerText.setPen(QColorConstants.Gray)
@@ -241,7 +259,7 @@ class TestButton(QGraphicsItemGroup):
         self.innerText = innerText
 
         if purpose == "directory":
-            self.fresh_change = False
+            self.freshChange = False
     
         if self.purpose == "random" and not flag:
             innerText.setPen(randomOffColor)
@@ -284,10 +302,10 @@ class TestButton(QGraphicsItemGroup):
         else:
             self.innerText.setPen(randomOnHoverColor)
             self.innerText.setBrush(randomOnHoverColor)
-        if self.purpose == "directory" and self.fresh_change:
+        if self.purpose == "directory" and self.freshChange:
             self.innerText.setPen(QColorConstants.Gray)
             self.innerText.setBrush(QColorConstants.Gray)
-            self.fresh_change = False
+            self.freshChange = False
 
     def hoverOff(self):
         if self.purpose == "random":
@@ -300,26 +318,18 @@ class TestButton(QGraphicsItemGroup):
         else:
             self.innerText.setPen(QColorConstants.Gray)
             self.innerText.setBrush(QColorConstants.Gray)
-        if self.purpose == "directory":
-            self.innerText.setPen(QColorConstants.Gray)
-            self.innerText.setBrush(QColorConstants.Gray)
-
 
     def pressed(self):
         if (self.parentItem().directory == None and not (self.purpose == "directory" or self.purpose == "settings" or self.purpose == "random")):
-            print("What")
             return
-        print(self.purpose, "has been pressed")
         if self.purpose == "directory":
-            self.fresh_change = True
+            self.freshChange = True
             self.parentItem().timerCircle.timer.stop()
             testName = QFileDialog.getExistingDirectory()
-            print("Test name: " + testName)
             filesArray = buildDirStructure(testName)
             if filesArray:
                 self.parentItem().directory = testName
                 self.parentItem().images = filesArray
-                print("new dir: " + testName)
                 self.parentItem().currentState = "break"
                 self.parentItem().timerCircle.currentTime = 0
                 self.parentItem().resetHistory()
@@ -331,7 +341,6 @@ class TestButton(QGraphicsItemGroup):
                 self.innerText.setPen(QColorConstants.Gray)
                 self.innerText.setBrush(QColorConstants.Gray)
             else:
-                print("Dir:", self.parentItem().directory)
                 if self.parentItem().directory != None:
                     self.parentItem().timerCircle.timer.start()
         elif self.purpose == "right":
@@ -346,7 +355,6 @@ class TestButton(QGraphicsItemGroup):
                     self.parentItem().currentState = "session"
                     self.parentItem().timerCircle.currentTime = self.parentItem().timerCircle.sessionTime
                     self.parentItem().frame.changeBackground(temp)
-                    print("History:", self.parentItem().imgHistory)
                 self.parentItem().timerCircle.timer.start()
         elif self.purpose == "random":
             if self.parentItem().randomState:

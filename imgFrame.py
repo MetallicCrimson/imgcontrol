@@ -46,7 +46,6 @@ class ImgFrame(QGraphicsView):
         super().resizeEvent(event)
         if self.fullPixmap == None:
             if self.imgName[-4:] == "avif":
-                print("it's an avif")
                 pixmap = QPixmap(os.getcwd() + "/temp.jpg")
             else:
                 pixmap = QPixmap(self.imgName)
@@ -95,7 +94,6 @@ class ImgFrame(QGraphicsView):
             os.remove(os.getcwd() + "/temp.jpg")
 
         if img[-4:] == "avif":
-            print("it's an avif")
             self.fullPixmap = self.handleAvif(img)
         else:
             self.fullPixmap = QPixmap(img)
@@ -105,15 +103,12 @@ class ImgFrame(QGraphicsView):
                                 Qt.AspectRatioMode.KeepAspectRatio))
         
         (temp_x, temp_y) = self.pixmap2.boundingRect().width(), self.pixmap2.boundingRect().height()
-        print(temp_x, temp_y)
         self.pixmap2.setPos((self.width()-temp_x) / 2, (self.height()-temp_y) / 2)
 
     def handleAvif(self, img):
-        imgname = img[:-5]
         tempImgName = os.getcwd() + "/temp.jpg"
         temp = Image.open(img)
         temp.save(tempImgName)
-        print("Saved to " + tempImgName)
         pixmap = QPixmap(tempImgName)
         return pixmap
     
