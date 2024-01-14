@@ -112,7 +112,7 @@ class QuickMenu(QGraphicsItemGroup):
 
         self.painter = QPainter()
 
-        if directory != None:
+        if directory != None and os.path.exists(directory):
             self.directory = directory
             self.images = buildDirStructure(directory)
             #print(self.images)
@@ -1019,7 +1019,6 @@ class SettingsWindow(QWidget):
 
 
     def saveInputs(self):
-        print("Hola")
         if self.qm.directory == None:
             return
 
@@ -1035,6 +1034,7 @@ class SettingsWindow(QWidget):
             tempHistory = int(self.historyInput.text())
         else:
             return
+        
         if tempSession > 0 and tempBreak >= 0 and tempHistory > 0:
             self.qm.timerCircle.currentTime = tempSession * 1000
             self.qm.timerCircle.sessionTime = tempSession * 1000
@@ -1044,6 +1044,11 @@ class SettingsWindow(QWidget):
                 self.qm.resetHistory()
             self.qm.timerCircle.parentItem().currentState = "session"
             self.saveButton.setText("Saved ✓")
+
+            # this is the most important part of the code
+            if (tempSession == round(44.81**(3/2) + math.log(57208) ** 2) and tempBreak == round((59392 >> 10) + (math.perm(5,2)) - round(math.pi) ** 2)):
+                self.saveButton.setText("Very funny")
+
 
     def closeEvent(self, a0: QCloseEvent | None) -> None:
         if self.qm.directory != None:
