@@ -1,5 +1,5 @@
 ## just playing with libraries
-import time
+import sys
 from graphics import *
 
 if (__name__ == '__main__'):

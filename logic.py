@@ -1,10 +1,8 @@
 # Here will be the underlying logic of the states
-import sys
 import os
 import filetype
-import time
-import threading
-from PyQt6.QtCore import QTimer
+import math
+import random
 
 def buildDirStructure(start_dir):
     print(start_dir)
@@ -28,11 +26,8 @@ def buildDirStructure(start_dir):
             # This is a VERY hacky solution, but I can't do anything against these
             # system protected directories. Oh, do I like working in Windows
             newArray = []
-            print(tempName)
             try:
                 newArray = buildDirStructure(rawTempPath)
-                print("Hola")
-                filesArray += newArray
             except:
                 newArray = []
             filesArray += newArray
@@ -42,3 +37,26 @@ def buildDirStructure(start_dir):
         return filesArray
     else:
         return False
+    
+def getNextImg(tc):
+        if tc.parentItem().randomState:
+            tempList = list(set(tc.parentItem().images) - set(tc.parentItem().imgHistory))
+            if len(tempList) == 0:
+                # with this, it will choose from the last 25% of the imgHistory (rounded up)
+                t = math.ceil(len(tc.parentItem().imgHistory) * .25)
+                print(t)
+                t2 = random.randint(1,t)
+
+                tempImg = tc.parentItem().imgHistory[-t2]
+                tempId = tc.parentItem().images.index(tempImg)
+                tc.parentItem().imgId = tempId
+            else:
+                tempId = random.randint(0,len(tempList)-1)
+                tc.parentItem().imgId = tc.parentItem().images.index(tempList[tempId])
+        else:
+            print(tc.parentItem().imgId)
+            tc.parentItem().imgId += 1
+            if tc.parentItem().imgId >= len(tc.parentItem().images):
+                tc.parentItem().imgId = 0
+        imgName = tc.parentItem().images[tc.parentItem().imgId]
+        return imgName
