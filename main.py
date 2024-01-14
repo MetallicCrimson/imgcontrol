@@ -56,7 +56,7 @@ None
 
     ## testing file stuff!
     #newButton = TestButtosn()
-    #newButton.msove(200,200)
+    #newButton.move(200,200)
     #frame.scene().addWidget(newButton)
     
     #frame.scene().addItem(bg_img)
@@ -70,4 +70,4 @@ None
     frame.show()
     app.exec()
     
-    sys.exit()
+    sys.exit() 

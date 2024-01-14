@@ -29,6 +29,33 @@ menuBrush = QColor(0,0,0)
 randomOffColor = QColor(60,60,60)
 randomOnHoverColor = QColor(50,50,50)
 
+boldFont = QtGui.QFont()
+boldFont.setBold(True)
+helpText1 = "Overview:"
+helpText2 = """ImgControl is a timed image viewer for artists, who want to practice quick sketches. It takes a directory, gets all its images (even from the subdirectories), and shows them either in a row, or in a random order. The program can be controlled with the (fully movable) UI row and with keyboard input as well.
+"""
+helpText3 = "The UI bar functions:"
+helpText4 = """(the keyboard input is just the same letter, left-right arrow, and space for the timer circle)
+
+R: changes the ordering. If it's light, it displays the images randomly, if it's dark, it walks through them in order.
+T: restarts the timer with the current image (basically the same as moving left and then right).
+Left arrow: jumps back to the previous image (if it can: check the "Image history" section).
+Timer circle: pauses and resumes the timer.
+Right arrow: gets the next image (either randomly or not).
+F: displays a folder selection dialog. If there is a folder selected, it clears the image history, restarts the timer, and displays either the first image, or a random one.
+S: displays the settings window.
+"""
+helpText5 = "Inputs in settings:"
+helpText6 = """Session seconds: the length of each drawing session. Lower limit is 1, upper limit is technically nonexistent (except the memory limitations), but please try to end it before the heat death of the universe...
+Break seconds: the option to include a short (or long, you decide) between sessions. Lower limit is 0, in which case it will simply goes to the next image without hesitation.
+Image history size: the program keeps track of the last x images for two reasons: to enable left scrolling, and to not randomly select the images in it (thus eliminating repetition). A size of 50 should be enough for all purposes, but it can handle larger without a problem. Also, if the chosen size cannot be bigger than the number of images in the directory.
+
+
+Note: hitting Enter saves the inputs (just like clicking the Save button), hitting Esc closes the settings window (without saving).
+Another note: if you want to delete the saved config data, delete config.txt from the folder of the program."""
+aboutText = """about test"""
+
+
 class QuickMenu(QGraphicsItemGroup):
     def __init__(self,window_width, window_height, x, y, session_length, break_length, history_size, random_state, directory, history, frame): # possibly more...?
         super().__init__()
@@ -424,7 +451,6 @@ class ImgFrame(QGraphicsView):
         #print(img)
 
         self.imgName = img # maybe not needed?
-        print("test", img)
         if os.path.exists(os.getcwd() + "/temp.jpg"):
             os.remove(os.getcwd() + "/temp.jpg")
 
@@ -432,16 +458,22 @@ class ImgFrame(QGraphicsView):
             print("it's an avif")
             #self.imgName = tempImgName
 
-            pixmap = self.handleAvif(img)
+            self.fullPixmap = self.handleAvif(img)
         else:
-            pixmap = QPixmap(img)
-        pixmap = pixmap.scaled(self.width(),
+            self.fullPixmap = QPixmap(img)
+
+        #pixmap = pixmap.scaled(self.width(),
+        #                        self.height(),
+        #                        Qt.AspectRatioMode.KeepAspectRatio)
+        self.pixmap2.setPixmap(self.fullPixmap.scaled(self.width(),
                                 self.height(),
-                                Qt.AspectRatioMode.KeepAspectRatio)
-        self.pixmap2.setPixmap(pixmap)
+                                Qt.AspectRatioMode.KeepAspectRatio))
+        
+        (temp_x, temp_y) = self.pixmap2.boundingRect().width(), self.pixmap2.boundingRect().height()
+        print(temp_x, temp_y)
         #self.backgroundPixmap = pixmap
-        print(self.pixmap2.boundingRect().width())
-        self.pixmap2.setPos((self.width()-self.pixmap2.boundingRect().width()) / 2, (self.height()-self.pixmap2.boundingRect().height()) / 2)
+        #print(self.pixmap2.boundingRect().width())
+        self.pixmap2.setPos((self.width()-temp_x) / 2, (self.height()-temp_y) / 2)
 
     def handleAvif(self, img):
         imgname = img[:-5]
@@ -463,21 +495,20 @@ class ImgFrame(QGraphicsView):
     def closeEvent(self, a0: QCloseEvent | None) -> None:
         if self.quickMenu.settingsWindow.isVisible:
             self.quickMenu.settingsWindow.close()
-        
-        print(self.quickMenu.historyIndex)
 
         if os.path.exists(os.getcwd() + "/temp.jpg"):
             os.remove(os.getcwd() + "/temp.jpg")
 
         # write config.txt
-        tempConfig = ""
-        tempConfig += str(self.width()) + "\n" + str(self.height()) + "\n" + str(self.pos().x()) + "\n" + str(self.pos().y()) + "\n" + str(int(self.quickMenu.pos().x())) + "\n" + str(int(self.quickMenu.pos().y())) + "\n" + str(int(self.quickMenu.timerCircle.sessionTime/1000)) + "\n" + str(int(self.quickMenu.timerCircle.breakTime/1000)) + "\n" + str(len(self.quickMenu.imgHistory)) + "\n" + str(self.quickMenu.randomState) + "\n" + self.quickMenu.directory
-        for item in self.quickMenu.imgHistory:
-            tempConfig += "\n" + str(item)
+        if self.quickMenu.directory != None:
+            tempConfig = ""
+            tempConfig += str(self.width()) + "\n" + str(self.height()) + "\n" + str(self.pos().x()) + "\n" + str(self.pos().y()) + "\n" + str(int(self.quickMenu.pos().x())) + "\n" + str(int(self.quickMenu.pos().y())) + "\n" + str(int(self.quickMenu.timerCircle.sessionTime/1000)) + "\n" + str(int(self.quickMenu.timerCircle.breakTime/1000)) + "\n" + str(len(self.quickMenu.imgHistory)) + "\n" + str(self.quickMenu.randomState) + "\n" + self.quickMenu.directory
+            for item in self.quickMenu.imgHistory:
+                tempConfig += "\n" + str(item)
 
-        #print(tempConfig)
-        with open("config.txt", "w") as file:
-            file.write(tempConfig)
+            #print(tempConfig)
+            with open("config.txt", "w") as file:
+                file.write(tempConfig)
 
         return super().closeEvent(a0)
 
@@ -710,11 +741,13 @@ class TimerCircle(QGraphicsItemGroup):
 
         self.sessionTime = session_length * 1000
         self.breakTime = break_length * 1000
-        self.currentTime = self.sessionTime - 50
-        self.interval = 50
+        self.interval = 33 # THIS
+        self.currentTime = self.sessionTime - self.interval
+        
 
         self.timer = QTimer()
-        self.timer.setInterval(50)
+        self.timer.setTimerType(Qt.TimerType.PreciseTimer)
+        self.timer.setInterval(self.interval)
         self.timer.timeout.connect(self.update_time)
 
         self.repaint()
@@ -728,7 +761,7 @@ class TimerCircle(QGraphicsItemGroup):
         #self.repaint()
 
     def update_time(self):
-        if self.currentTime >= self.interval:
+        if self.currentTime > self.interval:
             self.currentTime -= self.interval
             self.repaint()
             self.update()
@@ -748,7 +781,7 @@ class TimerCircle(QGraphicsItemGroup):
                         self.parentItem().frame.imgName = imgName
                         
                         # what
-                        self.parentItem().frame.fullPixmap = QPixmap(imgName)
+                        #self.parentItem().frame.fullPixmap = QPixmap(imgName)
 
 
                         self.parentItem().frame.changeBackground(imgName)
@@ -786,7 +819,6 @@ class TimerCircle(QGraphicsItemGroup):
                         self.parentItem().frame.imgName = imgName
                         
                         self.parentItem().frame.changeBackground(imgName)
-                    self.parentItem().frame.fullPixmap = QPixmap(imgName)
                         
                         
 
@@ -968,10 +1000,45 @@ class SettingsWindow(QWidget):
 
 
         return super().showEvent(a0)
+    
+    def keyReleaseEvent(self, a0: QKeyEvent | None) -> None:
+        if a0.key() == Qt.Key.Key_Escape:
+            self.close()
+
+        return super().keyReleaseEvent(a0)
+
+
+    def saveInputs(self):
+        print("Hola")
+        if self.qm.directory == None:
+            return
+
+        if self.sessionTimeInput.text().isdigit():
+            tempSession = int(self.sessionTimeInput.text())
+        else:
+            return
+        if self.breakTimeInput.text().isdigit():
+            tempBreak = int(self.breakTimeInput.text())
+        else:
+            return
+        if self.historyInput.text().isdigit():
+            tempHistory = int(self.historyInput.text())
+        else:
+            return
+        if tempSession > 0 and tempBreak >= 0 and tempHistory > 0:
+            self.qm.timerCircle.currentTime = tempSession * 1000
+            self.qm.timerCircle.sessionTime = tempSession * 1000
+            self.qm.timerCircle.breakTime = tempBreak * 1000
+            self.qm.historySize = tempHistory
+            if len(self.qm.imgHistory) != tempHistory:
+                self.qm.resetHistory()
+            self.qm.timerCircle.parentItem().currentState = "session"
+            self.saveButton.setText("Saved ✓")
 
     def closeEvent(self, a0: QCloseEvent | None) -> None:
         if self.qm.directory != None:
             self.qm.timerCircle.timer.start()
+            self.qm.frame.breakMask.setVisible(False)
 
         return super().closeEvent(a0)
     
@@ -989,32 +1056,8 @@ class SettingsInput(QLineEdit):
             self.sw.saveButton.setText("Save")
 
         if a0.key() == Qt.Key.Key_Return or a0.key() == Qt.Key.Key_Enter:
-            if self.qm.directory == None:
-                return
+            self.sw.saveInputs()
 
-            if self.sw.sessionTimeInput.text().isdigit():
-                tempSession = int(self.sw.sessionTimeInput.text())
-            else:
-                return
-            if self.sw.breakTimeInput.text().isdigit():
-                tempBreak = int(self.sw.breakTimeInput.text())
-            else:
-                return
-            if self.sw.historyInput.text().isdigit():
-                tempHistory = int(self.sw.historyInput.text())
-            else:
-                return
-            if tempSession > 0 and tempBreak >= 0 and tempHistory > 0:
-                self.qm.timerCircle.currentTime = tempSession * 1000
-                self.qm.timerCircle.sessionTime = tempSession * 1000
-                self.qm.timerCircle.breakTime = tempBreak * 1000
-                self.qm.historySize = tempHistory
-                if len(self.qm.imgHistory) != tempHistory:
-                    self.qm.resetHistory()
-                self.qm.timerCircle.parentItem().currentState = "session"
-                self.sw.saveButton.setText("Saved ✓")
-
-                # why
         elif a0.key() == Qt.Key.Key_Escape:
             self.sw.close()
 
@@ -1065,9 +1108,85 @@ class SettingsButton(QPushButton):
         self.sw = sw
         self.purpose = purpose
         self.qm = qm
+
+        if purpose in ["help", "about"]:
+            tempWindow = SettingsSubWindow(purpose, qm)
+            self.subWindow = tempWindow
+
         super().__init__(str.capitalize(purpose))
 
     def mouseReleaseEvent(self, e: QMouseEvent | None) -> None:
-        # for a bit later
-        print(self.purpose)
+        match self.purpose:
+            case "save":
+                self.sw.saveInputs()
+            case "help":
+                self.subWindow.show()
+            case "about":
+                self.subWindow.show()
+
         return super().mouseReleaseEvent(e)
+    
+class SettingsSubWindow(QWidget):
+    def __init__(self, purpose, qm):
+        super().__init__()
+
+        tempLayout = QVBoxLayout()
+        self.setLayout(tempLayout)
+        self.resize(0,0)
+
+
+
+        self.purpose = purpose
+        #self.layout().setSpacing(0)
+        self.setFixedWidth(600)
+
+        if purpose == "help":
+            tempLabel1 = QLabel(helpText1)
+            tempLabel1.setFont(boldFont)
+            tempLabel1.setWordWrap(True)
+            tempLabel2 = QLabel(helpText2)
+            tempLabel2.setWordWrap(True)
+            tempLabel3 = QLabel(helpText3)
+            tempLabel3.setFont(boldFont)
+            tempLabel3.setWordWrap(True)
+            tempLabel4 = QLabel(helpText4)
+            tempLabel4.setWordWrap(True)
+            tempLabel5 = QLabel(helpText5)
+            tempLabel5.setFont(boldFont)
+            tempLabel5.setWordWrap(True)
+            tempLabel6 = QLabel(helpText6)
+            tempLabel6.setWordWrap(True)
+
+            self.layout().addWidget(tempLabel1)
+            self.layout().addWidget(tempLabel2)
+            self.layout().addWidget(tempLabel3)
+            self.layout().addWidget(tempLabel4)
+            self.layout().addWidget(tempLabel5)
+            self.layout().addWidget(tempLabel6)
+        else:
+            ...
+
+        self.qm = qm
+
+    def showEvent(self, a0: QShowEvent | None) -> None:
+
+        print(self.qm.directory)
+
+#         if self.purpose == "help":
+#             if self.qm.directory == None:
+#                 tempText = """(If this is your first time opening the app, you have to select a directory to get it running. It can't show images without the images...)
+
+# """
+#             else:
+#                 tempText = ""
+#         else:
+#             tempText = aboutText
+        
+        #self.tempLabel.setText(tempText)
+        return super().showEvent(a0)
+
+    def keyReleaseEvent(self, a0: QKeyEvent | None) -> None:
+        if a0.key() == Qt.Key.Key_Escape:
+            self.close()
+
+        return super().keyReleaseEvent(a0)
