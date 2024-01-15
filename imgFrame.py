@@ -22,28 +22,29 @@ class ImgFrame(QGraphicsView):
         self.fullPixmap = None
         #self.scene().addItem(pixmap2)
 
-        self.pixmap = QPixmap("testpic.jpg")
-        tempRatio = self.pixmap.width() / self.pixmap.height()
-        windowRatio = width / height
+        # self.pixmap = QPixmap("testpic.jpg")
+        # tempRatio = self.pixmap.width() / self.pixmap.height()
+        # windowRatio = width / height
 
-        self.tempRatio = tempRatio
+        # self.tempRatio = tempRatio
 
-        if windowRatio > tempRatio:
-            newHeight = height
-            newWidth = height * tempRatio
-        else:
-            newWidth = width
-            newHeight = width * (1 / tempRatio)
+        # if windowRatio > tempRatio:
+        #     newHeight = height
+        #     newWidth = height * tempRatio
+        # else:
+        #     newWidth = width
+        #     newHeight = width * (1 / tempRatio)
 
-        print(tempRatio, windowRatio)
+        # print(tempRatio, windowRatio)
         testLabel = QLabel()
 
-        testLabel.resize(int(newWidth), int(newHeight))
+        #testLabel.resize(int(newWidth), int(newHeight))
         self.testLabel = testLabel
         self.scene().addWidget(testLabel)
-        testLabel.move((width - testLabel.width())//2, (height - testLabel.height())//2)
+        self.tempRatio = 1
+        #testLabel.move((width - testLabel.width())//2, (height - testLabel.height())//2)
 
-        testLabel.setStyleSheet("border-image: url('testpic.jpg')")
+        #testLabel.setStyleSheet("border-image: url('testpic.jpg')")
 
         breakMask = QGraphicsRectItem(0,0,width,height)
         breakMask.setPen(QColor(0,0,0,0))
@@ -63,6 +64,7 @@ class ImgFrame(QGraphicsView):
         self.setWindowIcon(QIcon("icon.png"))
 
     def resizeEvent(self, event: QResizeEvent | None) -> None:
+        print(self.tempRatio)
 
         width = self.width()
         height = self.height()
