@@ -15,15 +15,35 @@ class ImgFrame(QGraphicsView):
         self.backgroundPixmap = None
         self.move(x,y)
         
-        pixmap = QPixmap()
+        #pixmap = QPixmap()
         pixmap2 = QGraphicsPixmapItem()
-        pixmap = pixmap.scaled(width,
-                               height,
-                               Qt.AspectRatioMode.KeepAspectRatio)
-        pixmap2.setPixmap(pixmap)
+        #pixmap2.setPixmap(pixmap)
         self.pixmap2 = pixmap2
         self.fullPixmap = None
-        self.scene().addItem(pixmap2)
+        #self.scene().addItem(pixmap2)
+
+        self.pixmap = QPixmap("testpic.jpg")
+        tempRatio = self.pixmap.width() / self.pixmap.height()
+        windowRatio = width / height
+
+        self.tempRatio = tempRatio
+
+        if windowRatio > tempRatio:
+            newHeight = height
+            newWidth = height * tempRatio
+        else:
+            newWidth = width
+            newHeight = width * (1 / tempRatio)
+
+        print(tempRatio, windowRatio)
+        testLabel = QLabel()
+
+        testLabel.resize(int(newWidth), int(newHeight))
+        self.testLabel = testLabel
+        self.scene().addWidget(testLabel)
+        testLabel.move((width - testLabel.width())//2, (height - testLabel.height())//2)
+
+        testLabel.setStyleSheet("border-image: url('testpic.jpg')")
 
         breakMask = QGraphicsRectItem(0,0,width,height)
         breakMask.setPen(QColor(0,0,0,0))
@@ -43,6 +63,21 @@ class ImgFrame(QGraphicsView):
         self.setWindowIcon(QIcon("icon.png"))
 
     def resizeEvent(self, event: QResizeEvent | None) -> None:
+
+        width = self.width()
+        height = self.height()
+        windowRatio = width / height
+
+        if windowRatio > self.tempRatio:
+            newHeight = height
+            newWidth = height * self.tempRatio
+        else:
+            newWidth = width
+            newHeight = width * (1 / self.tempRatio)
+
+        self.testLabel.resize(int(newWidth), int(newHeight))
+        self.testLabel.move((width - self.testLabel.width())//2, (height - self.testLabel.height())//2)
+
         super().resizeEvent(event)
         if self.fullPixmap == None:
             if self.imgName[-4:] == "avif":
@@ -89,6 +124,37 @@ class ImgFrame(QGraphicsView):
         return super().keyReleaseEvent(event)
 
     def changeBackground(self,img):
+
+        if img[-4:] == "avif":
+            tempImgName = "temp.jpg"
+            temp = Image.open(img)
+            temp.save(tempImgName)
+            tempPixmap = QPixmap(tempImgName)
+            img = tempImgName
+        else:
+            tempPixmap = QPixmap(img)
+
+        width = self.width()
+        height = self.height()
+        
+        tempRatio = tempPixmap.width() / tempPixmap.height()
+        self.tempRatio = tempRatio
+        windowRatio = width / height
+
+        if windowRatio > self.tempRatio:
+            newHeight = height
+            newWidth = height * self.tempRatio
+        else:
+            newWidth = width
+            newHeight = width * (1 / self.tempRatio)
+
+        self.testLabel.setStyleSheet("border-image: url('" + img + "')")
+        
+        #self.testLabel.setStyleSheet("border-image: url('C:/Users/tamer/Documents/programming/python/ImgControl_py/testFolder/folder1/folder2/cat_pic13.jpg');")
+        self.testLabel.resize(int(newWidth), int(newHeight))
+        self.testLabel.move((width - self.testLabel.width())//2, (height - self.testLabel.height())//2)
+
+
         self.imgName = img
         if os.path.exists(os.getcwd() + "/temp.jpg"):
             os.remove(os.getcwd() + "/temp.jpg")
