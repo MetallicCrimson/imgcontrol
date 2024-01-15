@@ -12,39 +12,13 @@ class ImgFrame(QGraphicsView):
         self.setScene(self.myScene)
         self.myScene.setSceneRect(0,0,width,height)
         self.myScene.setBackgroundBrush(QColor(200,220,200))
-        self.backgroundPixmap = None
         self.move(x,y)
-        
-        #pixmap = QPixmap()
-        pixmap2 = QGraphicsPixmapItem()
-        #pixmap2.setPixmap(pixmap)
-        self.pixmap2 = pixmap2
-        self.fullPixmap = None
-        #self.scene().addItem(pixmap2)
 
-        # self.pixmap = QPixmap("testpic.jpg")
-        # tempRatio = self.pixmap.width() / self.pixmap.height()
-        # windowRatio = width / height
-
-        # self.tempRatio = tempRatio
-
-        # if windowRatio > tempRatio:
-        #     newHeight = height
-        #     newWidth = height * tempRatio
-        # else:
-        #     newWidth = width
-        #     newHeight = width * (1 / tempRatio)
-
-        # print(tempRatio, windowRatio)
         testLabel = QLabel()
 
-        #testLabel.resize(int(newWidth), int(newHeight))
         self.testLabel = testLabel
         self.scene().addWidget(testLabel)
         self.tempRatio = 1
-        #testLabel.move((width - testLabel.width())//2, (height - testLabel.height())//2)
-
-        #testLabel.setStyleSheet("border-image: url('testpic.jpg')")
 
         breakMask = QGraphicsRectItem(0,0,width,height)
         breakMask.setPen(QColor(0,0,0,0))
@@ -54,6 +28,7 @@ class ImgFrame(QGraphicsView):
         self.scene().setBackgroundBrush(0)
         self.imgName = ""
 
+        # refactor this somehow??
         self.itemGroup = QGraphicsItemGroup
         self.scene().addItem(breakMask)
 
@@ -64,7 +39,6 @@ class ImgFrame(QGraphicsView):
         self.setWindowIcon(QIcon("icon.png"))
 
     def resizeEvent(self, event: QResizeEvent | None) -> None:
-        print(self.tempRatio)
 
         width = self.width()
         height = self.height()
@@ -80,22 +54,12 @@ class ImgFrame(QGraphicsView):
         self.testLabel.resize(int(newWidth), int(newHeight))
         self.testLabel.move((width - self.testLabel.width())//2, (height - self.testLabel.height())//2)
 
-        super().resizeEvent(event)
-        if self.fullPixmap == None:
-            if self.imgName[-4:] == "avif":
-                pixmap = QPixmap(os.getcwd() + "/temp.jpg")
-            else:
-                pixmap = QPixmap(self.imgName)
-
-            self.fullPixmap = pixmap
-
         size = event.size()
         self.setSceneRect(0,0,size.width(),size.height())
         self.breakMask.setRect(0,0,size.width(),size.height())
-        self.pixmap2.setPixmap(self.fullPixmap.scaled(self.width(), self.height(), Qt.AspectRatioMode.KeepAspectRatio))
-        self.pixmap2.setPos((size.width()-self.pixmap2.boundingRect().width()) / 2, (size.height() - self.pixmap2.boundingRect().height()) / 2)
 
         self.quickMenu.reposition()
+        return super().resizeEvent(event)
 
     def keyReleaseEvent(self, event: QKeyEvent | None) -> None:
         if self.quickMenu.directory == None and (event.key() in [Qt.Key.Key_Space, Qt.Key.Key_T, Qt.Key.Key_Left, Qt.Key.Key_Right]):
@@ -131,6 +95,8 @@ class ImgFrame(QGraphicsView):
             tempImgName = "temp.jpg"
             temp = Image.open(img)
             temp.save(tempImgName)
+            print(os.path.exists(os.getcwd() + "/" + tempImgName))
+            print(os.getcwd())
             tempPixmap = QPixmap(tempImgName)
             img = tempImgName
         else:
@@ -152,40 +118,20 @@ class ImgFrame(QGraphicsView):
 
         self.testLabel.setStyleSheet("border-image: url('" + img + "')")
         
-        #self.testLabel.setStyleSheet("border-image: url('C:/Users/tamer/Documents/programming/python/ImgControl_py/testFolder/folder1/folder2/cat_pic13.jpg');")
         self.testLabel.resize(int(newWidth), int(newHeight))
         self.testLabel.move((width - self.testLabel.width())//2, (height - self.testLabel.height())//2)
 
-
         self.imgName = img
-        if os.path.exists(os.getcwd() + "/temp.jpg"):
-            os.remove(os.getcwd() + "/temp.jpg")
-
-        if img[-4:] == "avif":
-            self.fullPixmap = self.handleAvif(img)
-        else:
-            self.fullPixmap = QPixmap(img)
-
-        self.pixmap2.setPixmap(self.fullPixmap.scaled(self.width(),
-                                self.height(),
-                                Qt.AspectRatioMode.KeepAspectRatio))
-        
-        (temp_x, temp_y) = self.pixmap2.boundingRect().width(), self.pixmap2.boundingRect().height()
-        self.pixmap2.setPos((self.width()-temp_x) / 2, (self.height()-temp_y) / 2)
-
-    def handleAvif(self, img):
-        tempImgName = os.getcwd() + "/temp.jpg"
-        temp = Image.open(img)
-        temp.save(tempImgName)
-        pixmap = QPixmap(tempImgName)
-        return pixmap
+        if os.path.exists("temp.jpg"):
+            os.remove("temp.jpg")
     
     def closeEvent(self, a0: QCloseEvent | None) -> None:
         if self.quickMenu.settingsWindow.isVisible:
             self.quickMenu.settingsWindow.close()
 
-        if os.path.exists(os.getcwd() + "/temp.jpg"):
-            os.remove(os.getcwd() + "/temp.jpg")
+        # it shouldn't 
+        if os.path.exists("temp.jpg"):
+            os.remove("temp.jpg")
 
         # writing config.txt
         if self.quickMenu.directory != None:
