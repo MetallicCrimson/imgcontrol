@@ -32,7 +32,7 @@ Another note: if you want to delete the saved config data, delete config.txt fro
 aboutText = """This app was developed by Daniel Kovacs, as a request of an artist who got salty for not having a timed viewer for her million quintillion bajillion images (shoutout to Lia).
 
 It was made using Python, with PyQt6 as the graphics library.
-MIT license applies, so you can do anything you want either with this or with the code itself. 
+MIT license applies, so you can do anything you want either with this or with the code itself.
 
 Github page:"""
 
@@ -50,11 +50,11 @@ class SettingsWindow(QWidget):
         self.historyLabel = QLabel("Image history size:")
         historyInput = SettingsInput("history", self, qm)
         self.historyInput = historyInput
-        saveButton = SettingsButton("save", self, qm, win_x, win_y)
+        saveButton = SettingsButton("save", self, qm)
         self.saveButton = saveButton
-        helpButton = SettingsButton("help", self, qm, win_x, win_y)
+        helpButton = SettingsButton("help", self, qm)
         self.helpButton = helpButton
-        aboutButton = SettingsButton("about", self, qm, win_x, win_y)
+        aboutButton = SettingsButton("about", self, qm)
         self.aboutButton = aboutButton
 
         layout.addWidget(self.sessionLabel)
@@ -70,11 +70,11 @@ class SettingsWindow(QWidget):
         self.setWindowTitle("Settings")
         self.setWindowIcon(QIcon("icon.png"))
 
-        self.move(win_x + 30, win_y + 30)
-
         self.qm = qm
 
     def showEvent(self, a0: QShowEvent | None) -> None:
+        self.move(self.qm.frame.x() + 30, self.qm.frame.y() + 30)
+
         self.sessionTimeInput.setText(str(int(self.qm.timerCircle.sessionTime/1000)))
         self.breakTimeInput.setText(str(int(self.qm.timerCircle.breakTime/1000)))
         if self.qm.directory != None:
@@ -156,13 +156,13 @@ class SettingsInput(QLineEdit):
             return self.sw.sessionTimeInput.text() == str(int(self.qm.timerCircle.sessionTime/1000)) and self.sw.breakTimeInput.text() == str(int(self.qm.timerCircle.breakTime/1000)) and self.sw.historyInput.text() == str(len(self.qm.imgHistory))
     
 class SettingsButton(QPushButton):
-    def __init__(self, purpose, sw, qm, win_x, win_y):
+    def __init__(self, purpose, sw, qm):
         self.sw = sw
         self.purpose = purpose
         self.qm = qm
 
         if purpose in ["help", "about"]:
-            tempWindow = SettingsSubWindow(purpose, qm, win_x, win_y)
+            tempWindow = SettingsSubWindow(purpose, qm)
             self.subWindow = tempWindow
 
         super().__init__(str.capitalize(purpose))
@@ -179,13 +179,12 @@ class SettingsButton(QPushButton):
         return super().mouseReleaseEvent(e)
     
 class SettingsSubWindow(QWidget):
-    def __init__(self, purpose, qm, win_x, win_y):
+    def __init__(self, purpose, qm):
         super().__init__()
 
         tempLayout = QVBoxLayout()
         self.setLayout(tempLayout)
         self.resize(0,0)
-        self.move(win_x+60, win_y + 60)
 
         self.purpose = purpose
         self.setFixedWidth(600)
@@ -235,6 +234,7 @@ class SettingsSubWindow(QWidget):
         self.qm = qm
 
     def showEvent(self, a0: QShowEvent | None) -> None:
+        self.move(self.qm.frame.x() + 60, self.qm.frame.y() + 60)
         if self.purpose == "help":
             if self.qm.directory == None:
                 self.tempLabel0.setText("(If this is your first time opening the app, you have to select a directory to get it running. It can't show images without the images...)\n")

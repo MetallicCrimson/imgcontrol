@@ -5,7 +5,7 @@ if (__name__ == '__main__'):
     
     tempDirTest = os.getcwd() + "/testFolder"
 
-    if not os.path.exists(os.getcwd() + "/config.txt"): #os.path.exists(os.getcwd() + "/config.txt"):
+    if not os.path.exists(os.getcwd() + "/config.txt"): #os♣.path.exists(os.getcwd() + "/config.txt"):
         tempConfig = """800
 600
 50

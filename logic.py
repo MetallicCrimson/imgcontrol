@@ -13,7 +13,6 @@ def buildDirStructure(start_dir):
     filesArray = []
     for tempName in tempNames:
         tempPath = os.path.join(start_dir, tempName).replace("\\", "/")
-        print(tempPath)
         rawTempPath = r'{}'.format(tempPath)
         if os.path.exists(rawTempPath) and os.path.isfile(rawTempPath):
             if filetype.is_image(rawTempPath):

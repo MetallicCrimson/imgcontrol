@@ -19,6 +19,9 @@ class ImgFrame(QGraphicsView):
         self.testLabel = testLabel
         self.scene().addWidget(testLabel)
         self.tempRatio = 1
+        testLabel.setStyleSheet("border-image: url('defaultimg.png')")
+
+
 
         breakMask = QGraphicsRectItem(0,0,width,height)
         breakMask.setPen(QColor(0,0,0,0))
@@ -28,7 +31,6 @@ class ImgFrame(QGraphicsView):
         self.scene().setBackgroundBrush(0)
         self.imgName = ""
 
-        # refactor this somehow??
         self.itemGroup = QGraphicsItemGroup
         self.scene().addItem(breakMask)
 
@@ -95,8 +97,6 @@ class ImgFrame(QGraphicsView):
             tempImgName = "temp.jpg"
             temp = Image.open(img)
             temp.save(tempImgName)
-            print(os.path.exists(os.getcwd() + "/" + tempImgName))
-            print(os.getcwd())
             tempPixmap = QPixmap(tempImgName)
             img = tempImgName
         else:
@@ -116,7 +116,7 @@ class ImgFrame(QGraphicsView):
             newWidth = width
             newHeight = width * (1 / self.tempRatio)
 
-        self.testLabel.setStyleSheet("border-image: url('" + img + "')")
+        self.testLabel.setStyleSheet("border-image: url('" + img + "');")
         
         self.testLabel.resize(int(newWidth), int(newHeight))
         self.testLabel.move((width - self.testLabel.width())//2, (height - self.testLabel.height())//2)
@@ -129,7 +129,7 @@ class ImgFrame(QGraphicsView):
         if self.quickMenu.settingsWindow.isVisible:
             self.quickMenu.settingsWindow.close()
 
-        # it shouldn't 
+        # it shouldn't exist at this point, but just to be safe
         if os.path.exists("temp.jpg"):
             os.remove("temp.jpg")
 
