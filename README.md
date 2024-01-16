@@ -17,7 +17,7 @@ T: restart the timer
 left/right: step through the images (of course left is only enabled if there actually was a previous image)  
 F: select a folder (there can be only one selected, but that can be changed anytime)  
 S: settings, help, about  
-space: pause/resume the timer
+timer circle (or space on keyboard): pause/resume the timer
 
 The session timer and break timer can be set in the Settings window, as well as the length of the image history (which is implemented to enable backwards stepping, and to reduce repetiton in the random ordering of the images). The image history length cannot be larger than the count of the images from the current directory.
 
