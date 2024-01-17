@@ -1,6 +1,7 @@
 import pillow_avif
 from PIL import Image
 from PyQt6.QtCore import QSize
+import sys
 
 from quickMenu import *
 
@@ -14,14 +15,20 @@ class ImgFrame(QGraphicsView):
         self.myScene.setBackgroundBrush(QColor(200,220,200))
         self.move(x,y)
 
-        testLabel = QLabel()
+        backgroundLabel = QLabel()
 
-        self.testLabel = testLabel
-        self.scene().addWidget(testLabel)
+        self.backgroundLabel = backgroundLabel
+        self.scene().addWidget(backgroundLabel)
         self.tempRatio = 1
-        testLabel.setStyleSheet("border-image: url('defaultimg.png')")
+        tempFont = QFont()
+        tempFont.setPixelSize(22)
 
-
+        defaultLabel = QLabel()
+        self.defaultLabel = defaultLabel
+        defaultLabel.setFont(tempFont)
+        defaultLabel.setText("""     Please select a folder,
+  or check out the settings!  """)
+        self.scene().addWidget(defaultLabel)
 
         breakMask = QGraphicsRectItem(0,0,width,height)
         breakMask.setPen(QColor(0,0,0,0))
@@ -44,6 +51,10 @@ class ImgFrame(QGraphicsView):
 
         width = self.width()
         height = self.height()
+
+        if height == 0:
+            return
+
         windowRatio = width / height
 
         if windowRatio > self.tempRatio:
@@ -53,8 +64,11 @@ class ImgFrame(QGraphicsView):
             newWidth = width
             newHeight = width * (1 / self.tempRatio)
 
-        self.testLabel.resize(int(newWidth), int(newHeight))
-        self.testLabel.move((width - self.testLabel.width())//2, (height - self.testLabel.height())//2)
+        self.backgroundLabel.resize(int(newWidth), int(newHeight))
+        self.backgroundLabel.move((width - self.backgroundLabel.width())//2, (height - self.backgroundLabel.height())//2)
+
+        if self.defaultLabel.isVisible():
+            self.defaultLabel.move((width - self.defaultLabel.width())//2, (height - self.defaultLabel.height())//2)
 
         size = event.size()
         self.setSceneRect(0,0,size.width(),size.height())
@@ -92,6 +106,9 @@ class ImgFrame(QGraphicsView):
         return super().keyReleaseEvent(event)
 
     def changeBackground(self,img):
+        self.defaultLabel.setVisible(False)
+        
+
 
         if img[-4:] == "avif":
             tempImgName = "temp.jpg"
@@ -116,10 +133,10 @@ class ImgFrame(QGraphicsView):
             newWidth = width
             newHeight = width * (1 / self.tempRatio)
 
-        self.testLabel.setStyleSheet("border-image: url('" + img + "');")
+        self.backgroundLabel.setStyleSheet("border-image: url('" + img + "');")
         
-        self.testLabel.resize(int(newWidth), int(newHeight))
-        self.testLabel.move((width - self.testLabel.width())//2, (height - self.testLabel.height())//2)
+        self.backgroundLabel.resize(int(newWidth), int(newHeight))
+        self.backgroundLabel.move((width - self.backgroundLabel.width())//2, (height - self.backgroundLabel.height())//2)
 
         self.imgName = img
         if os.path.exists("temp.jpg"):
