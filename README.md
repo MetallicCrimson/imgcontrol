@@ -29,7 +29,9 @@ Upon closing, the program stores its width, height, coordinates, menu position, 
 
 
 ## Installation
-~~What installation?~~ To run the program on Windows or Linux, you can just run the executable without any installs: you can choose the appropriate one from the [executables folder](https://github.com/SilverCrimson/imgcontrol/tree/main/executables) (it works with just the executable file itself, but for displaying the icon and a default image if no directory is selected, it needs the additional two images as well). The project is only packaged to Windows and Linux, because, frankly, I don't own a mac, and I don't intend to. The two versions are identical, except the UI bar left-right icons, and some placement in the settings and about page (these caused a lot of problems when tested, however I've only tested them under WSL. Maybe it would all be fine under a real linux install, which I'll certainly try, when I get my sound card working under Ubuntu).
+~~What installation?~~ You can find releases for [Windows](https://github.com/SilverCrimson/imgcontrol/releases/tag/v0.9w) and [Linux](https://github.com/SilverCrimson/imgcontrol/releases/tag/v0.8l). Just download the `Source code (zip)` version, extract it wherever you want, and run the executable from there.  
+The two versions are identical, except the UI bar left-right icons, and some placement in the settings and about page (these caused a lot of problems when tested, however I've only tested them under WSL. Maybe it would all be fine under a real linux install, which I'll certainly try, when I get my sound card working under Ubuntu).  
+The program is not packaged to mac, because, frankly, I don't own a mac, and I don't intend to. (Maybe if i wouldn't have an AMD cpu, I could actually use a VM to do it...)
 
 If you want to run the code itself though, no problem. You'll need the following things installed:
 - `python 3.10` or higher - because of the match-case syntax
