@@ -1,7 +1,6 @@
 import pillow_avif
 from PIL import Image
 from PyQt6.QtCore import QSize
-import sys
 
 from quickMenu import *
 
