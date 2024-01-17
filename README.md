@@ -29,7 +29,7 @@ Upon closing, the program stores its width, height, coordinates, menu position, 
 
 
 ## Installation
-~~What installation?~~ You can find releases for [Windows](https://github.com/SilverCrimson/imgcontrol/releases/tag/v0.9w) and [Linux](https://github.com/SilverCrimson/imgcontrol/releases/tag/v0.8l). Just download the `Source code (zip)` version, extract it wherever you want, and run the executable from there.  
+~~What installation?~~ You can find releases for [Windows](https://github.com/SilverCrimson/imgcontrol/releases/tag/0.9w) and [Linux](https://github.com/SilverCrimson/imgcontrol/releases/tag/0.8l). Just download the `Source code (zip)` version, extract it wherever you want, and run the executable from there.  
 The two versions are identical, except the UI bar left-right icons, and some placement in the settings and about page (these caused a lot of problems when tested, however I've only tested them under WSL. Maybe it would all be fine under a real linux install, which I'll certainly try, when I get my sound card working under Ubuntu).  
 The program is not packaged to mac, because, frankly, I don't own a mac, and I don't intend to. (Maybe if i wouldn't have an AMD cpu, I could actually use a VM to do it...)
 
