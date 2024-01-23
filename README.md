@@ -29,12 +29,12 @@ Upon closing, the program stores its width, height, coordinates, menu position, 
 
 
 ## Installation
-~~What installation?~~ You can find releases for [Windows](https://github.com/SilverCrimson/imgcontrol/releases/tag/0.9w) and [Linux](https://github.com/SilverCrimson/imgcontrol/releases/tag/0.8l). Just download the `Source code (zip)` version, extract it wherever you want, and run the executable from there.  
+~~What installation?~~ [You can find the releases here](https://github.com/SilverCrimson/imgcontrol/releases/tag/0.9), for Windows and Linux. Download the zip file appropriate for your system, extract it wherever you want, and run the executable from there.  
 The two versions are identical, except the UI bar left-right icons, and some placement in the settings and about page (these caused a lot of problems when tested, however I've only tested them under WSL. Maybe it would all be fine under a real linux install, which I'll certainly try, when I get my sound card working under Ubuntu).  
 The program is not packaged to mac, because, frankly, I don't own a mac, and I don't intend to. (Maybe if i wouldn't have an AMD cpu, I could actually use a VM to do it...)
 
-If you want to run the code itself though, no problem. You'll need the following things installed:
+If you want to run the source code itself though, no problem. You'll need the following things installed:
 - `python 3.10` or higher - because of the match-case syntax
-- the following libraries (usually installed with pip): `pyqt6`, `image`, `pillow-avif-plugin` (the last two are just to deal with avif files)
+- the following libraries (usually installed with pip): `pyqt6`, `filesystem`, `image`, `pillow-avif-plugin` (the last two are just to deal with avif files)
   
 With these, you can run `ImgControl.py`. You'll even get a few images in the `testImages` folder to try the program out.
