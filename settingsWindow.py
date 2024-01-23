@@ -184,10 +184,15 @@ class SettingsSubWindow(QWidget):
 
         tempLayout = QVBoxLayout()
         self.setLayout(tempLayout)
-        if purpose == "help":
-            self.resize(0,650)
-        elif purpose == "about":
-            self.resize(0,200)
+
+        # Windows version:
+        self.resize(0,0)
+
+        # Linux version:
+        # if purpose == "help":
+        #     self.resize(0,650)
+        # elif purpose == "about":
+        #     self.resize(0,200)
 
         self.purpose = purpose
         self.setFixedWidth(600)

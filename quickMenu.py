@@ -277,9 +277,15 @@ class TestButton(QGraphicsItemGroup):
             case "settings":
                 innerText.setText("S")
             case "left":
-                innerText.setText("◂")
+                # Windows version:
+                innerText.setText("⏴")
+                # Linux version:
+                # innerText.setText("◂")
             case "right":
-                innerText.setText("▸")    
+                # Windows version:
+                innerText.setText("⏵")
+                # Linux version:
+                innerText.setText("▸")
             case _:
                 print("What the fuck")
 
@@ -290,7 +296,10 @@ class TestButton(QGraphicsItemGroup):
         innerText.setX(tempRect.boundingRect().center().x() - innerText.boundingRect().width()/2)
         if purpose == "left":
             innerText.setY(innerText.y() - 2)
-            innerText.setX(innerText.x() + 0)
+            # Windows version:
+            innerText.setX(innerText.x() + 3)
+            # Linux version:
+            # innerText.setX(innerText.x() + 0)
         if purpose == "right":
             innerText.setY(innerText.y() - 2)
             innerText.setX(innerText.x() + 1)
