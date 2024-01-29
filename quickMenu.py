@@ -285,7 +285,7 @@ class TestButton(QGraphicsItemGroup):
                 # Windows version:
                 innerText.setText("⏵")
                 # Linux version:
-                innerText.setText("▸")
+                # innerText.setText("▸")
             case _:
                 print("What the fuck")
 
