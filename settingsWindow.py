@@ -231,7 +231,7 @@ class SettingsSubWindow(QWidget):
         else:
             tempLabel1 = QLabel(aboutText)
             tempLabel1.setWordWrap(True)
-            tempLabel2 = QLabel("<a href=\"https://github.com/SilverCrimson\">https://github.com/SilverCrimson</a>")
+            tempLabel2 = QLabel("<a href=\"https://github.com/MetallicCrimson\">https://github.com/MetallicCrimson</a>")
             tempLabel2.setWordWrap(True)
             tempLabel2.setOpenExternalLinks(True)
             self.layout().addWidget(tempLabel1)
