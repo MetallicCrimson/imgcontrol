@@ -6,7 +6,7 @@ It lets the user select a directory from their hard drive, and collects all the 
 
 Screenshots of the program during a drawing session and during a break:
 
-![image](https://github.com/SilverCrimson/imgcontrol/assets/67794509/d79452ce-094a-4364-8333-dafbf9929c38)
+![image](https://github.com/MetallicCrimson/imgcontrol/assets/67794509/d79452ce-094a-4364-8333-dafbf9929c38)
 
 It has a freely movable UI bar, but it can be controlled with keyboard input as well.
 
@@ -29,7 +29,7 @@ Upon closing, the program stores its width, height, coordinates, menu position, 
 
 
 ## Installation
-~~What installation?~~ [You can find the releases here](https://github.com/MetallicCrimson/imgcontrol/releases/tag/0.9), for Windows and Linux. Download the zip file appropriate for your system, extract it wherever you want, and run the executable from there.  
+~~What installation?~~ [You can find the releases here](https://github.com/MetallicCrimson/imgcontrol/releases/tag/v0.9.1), for Windows and Linux. Download the zip file appropriate for your system, extract it wherever you want, and run the executable from there.  
 The two versions are identical, except the UI bar left-right icons, and some placement in the settings and about page (these caused a lot of problems when tested, however I've only tested them under WSL. Maybe it would all be fine under a real linux install, which I'll certainly try, when I get my sound card working under Ubuntu).  
 The program is not packaged to mac, because, frankly, I don't own a mac, and I don't intend to. (Maybe if i wouldn't have an AMD cpu, I could actually use a VM to do it...)
 
